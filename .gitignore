@@ -24,8 +24,18 @@ go.work.sum
 # env file
 .env
 
+# Docker volume used by the db in the dev/testing environment
+testing_db_volume/
+
+# Backups and SQL dumps
+*.sql
+*.backup
+
 # Obsidian configuration
 .obsidian/
 
 # Obsidian personal notes
 docs/dev/
+
+# VSCode files
+.vscode/
