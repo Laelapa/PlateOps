@@ -24,6 +24,10 @@ go.work.sum
 # env file
 .env
 
+# Local testing environment configurations
+docker-compose.yml
+Makefile
+
 # Docker volume used by the db in the dev/testing environment
 testing_db_volume/
 
