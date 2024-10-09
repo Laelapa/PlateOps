@@ -7,7 +7,12 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/DemetriusPapas/PlateOps/internal/database"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
+
+	_ "github.com/jackc/pgx/v5"
 )
 
 // Using main() as a thin wrapper around actualMain()
@@ -20,14 +25,21 @@ func main() {
 }
 
 func actualMain(ctx context.Context, w io.Writer, args []string) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt) // Handle OS signals gracefully
+	// Handle OS signals gracefully
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	dbConnection, err := pgx.Connect(context.Background(), os.Getenv("DB_URL"))
+	// Loading the .env contents
+	godotenv.Load()
+
+	// Creating a database connection pool
+	dbPool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
 		return err
 	}
-	defer dbConnection.Close(context.Background())
+	defer dbPool.Close()
+
+	dbQuery := database.New(dbPool)
 
 	return nil //TODO: Placeholder value
 }

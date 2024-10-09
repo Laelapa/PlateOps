@@ -5,87 +5,85 @@
 package database
 
 import (
-	"database/sql"
-
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type FoodRegistry struct {
 	ProductID              int32
 	Name                   string
-	Gtin                   sql.NullString
-	Category               sql.NullString
-	Description            sql.NullString
+	Gtin                   pgtype.Text
+	Category               pgtype.Text
+	Description            pgtype.Text
 	UnitType               string
-	Quantity               sql.NullInt32
-	PortionCount           sql.NullInt32
-	ExpirationAfterOpening sql.NullInt32
-	NutrientsPerItem       sql.NullBool
-	Calories               sql.NullString
-	Fats                   sql.NullString
-	Saturated              sql.NullString
-	Carbs                  sql.NullString
-	Sugars                 sql.NullString
-	Protein                sql.NullString
-	Fiber                  sql.NullString
-	Sodium                 sql.NullString
-	CreatedAt              sql.NullTime
-	UpdatedAt              sql.NullTime
-	CreatedBy              uuid.NullUUID
-	UodatedBy              uuid.NullUUID
+	Quantity               pgtype.Int4
+	PortionCount           pgtype.Int4
+	ExpirationAfterOpening pgtype.Int4
+	NutrientsPerItem       pgtype.Bool
+	Calories               pgtype.Numeric
+	Fats                   pgtype.Numeric
+	Saturated              pgtype.Numeric
+	Carbs                  pgtype.Numeric
+	Sugars                 pgtype.Numeric
+	Protein                pgtype.Numeric
+	Fiber                  pgtype.Numeric
+	Sodium                 pgtype.Numeric
+	CreatedAt              pgtype.Timestamp
+	UpdatedAt              pgtype.Timestamp
+	CreatedBy              pgtype.UUID
+	UodatedBy              pgtype.UUID
 }
 
 type Inventory struct {
 	ID                     int32
-	UserID                 uuid.NullUUID
-	ProductID              sql.NullInt32
-	ExpirationDate         sql.NullTime
-	ExpirationAfterOpening sql.NullInt32
-	IsOpened               sql.NullBool
+	UserID                 pgtype.UUID
+	ProductID              pgtype.Int4
+	ExpirationDate         pgtype.Date
+	ExpirationAfterOpening pgtype.Int4
+	IsOpened               pgtype.Bool
 	MaxQuantity            float64
 	CurrQuantity           float64
-	PurchaseDate           sql.NullTime
-	OpenedDate             sql.NullTime
-	CreatedAt              sql.NullTime
-	UpdatedAt              sql.NullTime
+	PurchaseDate           pgtype.Timestamp
+	OpenedDate             pgtype.Timestamp
+	CreatedAt              pgtype.Timestamp
+	UpdatedAt              pgtype.Timestamp
 }
 
 type Recipe struct {
 	ID                  int32
-	UserID              uuid.NullUUID
+	UserID              pgtype.UUID
 	Name                string
-	Private             sql.NullBool
-	Description         sql.NullString
-	Instructions        sql.NullString
+	Private             pgtype.Bool
+	Description         pgtype.Text
+	Instructions        pgtype.Text
 	UnitType            string
-	Quantity            sql.NullInt32
-	NutrientsPerPortion sql.NullBool
-	Calories            sql.NullString
-	Fats                sql.NullString
-	Saturated           sql.NullString
-	Carbs               sql.NullString
-	Sugars              sql.NullString
-	Protein             sql.NullString
-	Fiber               sql.NullString
-	Sodium              sql.NullString
-	CreatedAt           sql.NullTime
-	UpdatedAt           sql.NullTime
+	Quantity            pgtype.Int4
+	NutrientsPerPortion pgtype.Bool
+	Calories            pgtype.Numeric
+	Fats                pgtype.Numeric
+	Saturated           pgtype.Numeric
+	Carbs               pgtype.Numeric
+	Sugars              pgtype.Numeric
+	Protein             pgtype.Numeric
+	Fiber               pgtype.Numeric
+	Sodium              pgtype.Numeric
+	CreatedAt           pgtype.Timestamp
+	UpdatedAt           pgtype.Timestamp
 }
 
 type RecipeIngredient struct {
 	ID        int32
-	RecipeID  sql.NullInt32
-	ProductID sql.NullInt32
+	RecipeID  pgtype.Int4
+	ProductID pgtype.Int4
 	Quantity  float64
 }
 
 type User struct {
-	ID            uuid.UUID
+	ID            pgtype.UUID
 	Username      string
 	Email         string
 	PasswordHash  string
-	CreatedAt     sql.NullTime
-	UpdatedAt     sql.NullTime
-	LastLogin     sql.NullTime
-	ActiveAccount sql.NullBool
+	CreatedAt     pgtype.Timestamp
+	UpdatedAt     pgtype.Timestamp
+	LastLogin     pgtype.Timestamp
+	ActiveAccount pgtype.Bool
 }

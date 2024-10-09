@@ -25,7 +25,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Username, arg.Email, arg.PasswordHash)
+	row := q.db.QueryRow(ctx, createUser, arg.Username, arg.Email, arg.PasswordHash)
 	var i User
 	err := row.Scan(
 		&i.ID,
