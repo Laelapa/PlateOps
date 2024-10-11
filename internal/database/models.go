@@ -30,7 +30,7 @@ type FoodRegistry struct {
 	CreatedAt              pgtype.Timestamp
 	UpdatedAt              pgtype.Timestamp
 	CreatedBy              pgtype.UUID
-	UodatedBy              pgtype.UUID
+	UpdatedBy              pgtype.UUID
 }
 
 type Inventory struct {

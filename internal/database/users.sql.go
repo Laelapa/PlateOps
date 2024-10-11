@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -38,4 +40,182 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.ActiveAccount,
 	)
 	return i, err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
+const disableUser = `-- name: DisableUser :exec
+UPDATE users
+SET active_account=FALSE
+WHERE id = $1
+`
+
+func (q *Queries) DisableUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, disableUser, id)
+	return err
+}
+
+const enableUser = `-- name: EnableUser :exec
+UPDATE users
+SET active_account=TRUE
+WHERE id = $1
+`
+
+func (q *Queries) EnableUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, enableUser, id)
+	return err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, username, email, password_hash, created_at, updated_at, last_login, active_account
+FROM users
+WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.LastLogin,
+		&i.ActiveAccount,
+	)
+	return i, err
+}
+
+const getUserByUsername = `-- name: GetUserByUsername :one
+SELECT id, username, email, password_hash, created_at, updated_at, last_login, active_account
+FROM users
+WHERE username = $1
+`
+
+func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUsername, username)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.LastLogin,
+		&i.ActiveAccount,
+	)
+	return i, err
+}
+
+const getUserIdByEmail = `-- name: GetUserIdByEmail :one
+SELECT id
+FROM users
+WHERE email = $1
+`
+
+func (q *Queries) GetUserIdByEmail(ctx context.Context, email string) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, getUserIdByEmail, email)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getUserIdByUsername = `-- name: GetUserIdByUsername :one
+SELECT id
+FROM users
+WHERE username = $1
+`
+
+func (q *Queries) GetUserIdByUsername(ctx context.Context, username string) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, getUserIdByUsername, username)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET username = $2, email = $3
+WHERE id = $1
+`
+
+type UpdateUserParams struct {
+	ID       pgtype.UUID
+	Username string
+	Email    string
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+	_, err := q.db.Exec(ctx, updateUser, arg.ID, arg.Username, arg.Email)
+	return err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :exec
+UPDATE users
+SET email = $2
+WHERE id = $1
+`
+
+type UpdateUserEmailParams struct {
+	ID    pgtype.UUID
+	Email string
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
+	_, err := q.db.Exec(ctx, updateUserEmail, arg.ID, arg.Email)
+	return err
+}
+
+const updateUserLastLogin = `-- name: UpdateUserLastLogin :exec
+UPDATE users
+SET last_login = CURRENT_TIMESTAMP
+WHERE id = $1
+`
+
+func (q *Queries) UpdateUserLastLogin(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, updateUserLastLogin, id)
+	return err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users
+SET password_hash = $2
+WHERE id = $1
+`
+
+type UpdateUserPasswordParams struct {
+	ID           pgtype.UUID
+	PasswordHash string
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateUserPassword, arg.ID, arg.PasswordHash)
+	return err
+}
+
+const updateUserUsername = `-- name: UpdateUserUsername :exec
+UPDATE users
+SET username = $2
+WHERE id = $1
+`
+
+type UpdateUserUsernameParams struct {
+	ID       pgtype.UUID
+	Username string
+}
+
+func (q *Queries) UpdateUserUsername(ctx context.Context, arg UpdateUserUsernameParams) error {
+	_, err := q.db.Exec(ctx, updateUserUsername, arg.ID, arg.Username)
+	return err
 }

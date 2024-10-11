@@ -21,7 +21,7 @@ CREATE TABLE food_registry (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_by uuid REFERENCES users(id),
-    uodated_by uuid REFERENCES users(id),
+    updated_by uuid REFERENCES users(id),
     CONSTRAINT unit_type_check CHECK (unit_type IN ('items', 'grams', 'ml', 'portions'))
 );
 
