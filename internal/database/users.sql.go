@@ -54,7 +54,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 
 const disableUser = `-- name: DisableUser :exec
 UPDATE users
-SET active_account=FALSE
+SET active_account=FALSE, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -65,7 +65,7 @@ func (q *Queries) DisableUser(ctx context.Context, id pgtype.UUID) error {
 
 const enableUser = `-- name: EnableUser :exec
 UPDATE users
-SET active_account=TRUE
+SET active_account=TRUE, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -146,7 +146,7 @@ func (q *Queries) GetUserIdByUsername(ctx context.Context, username string) (pgt
 
 const updateUser = `-- name: UpdateUser :exec
 UPDATE users
-SET username = $2, email = $3
+SET username = $2, email = $3, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -163,7 +163,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 
 const updateUserEmail = `-- name: UpdateUserEmail :exec
 UPDATE users
-SET email = $2
+SET email = $2, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -179,7 +179,7 @@ func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams
 
 const updateUserLastLogin = `-- name: UpdateUserLastLogin :exec
 UPDATE users
-SET last_login = CURRENT_TIMESTAMP
+SET last_login = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -190,7 +190,7 @@ func (q *Queries) UpdateUserLastLogin(ctx context.Context, id pgtype.UUID) error
 
 const updateUserPassword = `-- name: UpdateUserPassword :exec
 UPDATE users
-SET password_hash = $2
+SET password_hash = $2, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
@@ -206,7 +206,7 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 
 const updateUserUsername = `-- name: UpdateUserUsername :exec
 UPDATE users
-SET username = $2
+SET username = $2, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 

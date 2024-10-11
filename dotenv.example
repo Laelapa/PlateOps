@@ -1,3 +1,4 @@
+# `ENVIRONMENT=dev` enables API endpoints to do "dev" things like resetting the database.
 ENVIRONMENT=dev
 POSTGRES_USER=pguser
 POSTGRES_PASSWORD=pgpassword

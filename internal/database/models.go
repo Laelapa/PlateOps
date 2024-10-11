@@ -34,18 +34,45 @@ type FoodRegistry struct {
 }
 
 type Inventory struct {
+	ID              int32
+	UserID          pgtype.UUID
+	ProductID       int32
+	ExpirationDate  pgtype.Date
+	IsOpened        pgtype.Bool
+	CurrentQuantity float64
+	PurchaseDate    pgtype.Timestamp
+	OpenedDate      pgtype.Timestamp
+	CreatedAt       pgtype.Timestamp
+	UpdatedAt       pgtype.Timestamp
+}
+
+type InventoryItemWithInfo struct {
 	ID                     int32
 	UserID                 pgtype.UUID
-	ProductID              pgtype.Int4
+	ProductID              int32
 	ExpirationDate         pgtype.Date
-	ExpirationAfterOpening pgtype.Int4
 	IsOpened               pgtype.Bool
-	MaxQuantity            float64
-	CurrQuantity           float64
+	CurrentQuantity        float64
 	PurchaseDate           pgtype.Timestamp
 	OpenedDate             pgtype.Timestamp
 	CreatedAt              pgtype.Timestamp
 	UpdatedAt              pgtype.Timestamp
+	Name                   string
+	Gtin                   pgtype.Text
+	Category               pgtype.Text
+	Description            pgtype.Text
+	UnitType               string
+	Quantity               pgtype.Int4
+	ExpirationAfterOpening pgtype.Int4
+	NutrientsPerItem       pgtype.Bool
+	Calories               pgtype.Numeric
+	Fats                   pgtype.Numeric
+	Saturated              pgtype.Numeric
+	Carbs                  pgtype.Numeric
+	Sugars                 pgtype.Numeric
+	Protein                pgtype.Numeric
+	Fiber                  pgtype.Numeric
+	Sodium                 pgtype.Numeric
 }
 
 type Recipe struct {

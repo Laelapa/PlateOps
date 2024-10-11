@@ -306,6 +306,7 @@ SET
     protein = $16,
     fiber = $17,
     sodium = $18,
+    updated_at = CURRENT_TIMESTAMP,
     updated_by = $19
 WHERE product_id = $1
 `
