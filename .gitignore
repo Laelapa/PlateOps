@@ -28,9 +28,6 @@ go.work.sum
 docker-compose.yml
 Makefile
 
-# Docker volume used by the db in the dev/testing environment
-testing_db_volume/
-
 # Backups and SQL dumps
 pgdump/*.sql
 *.backup
