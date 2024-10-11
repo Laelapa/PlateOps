@@ -1,0 +1,6 @@
+ENVIRONMENT=dev
+POSTGRES_USER=pguser
+POSTGRES_PASSWORD=pgpassword
+POSTGRES_PORT=5432
+POSTGRES_DB=postgresdb
+DB_URL="postgres://pguser:pgpassword@serverurl:5432/postgresdb"
