@@ -32,7 +32,7 @@ Makefile
 testing_db_volume/
 
 # Backups and SQL dumps
-*.sql
+pgdump/*.sql
 *.backup
 
 # Obsidian configuration
