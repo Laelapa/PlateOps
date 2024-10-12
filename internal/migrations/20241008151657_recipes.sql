@@ -1,7 +1,7 @@
 -- +goose Up
 CREATE TABLE recipes (
     id SERIAL PRIMARY KEY,
-    user_id uuid REFERENCES users(id),
+    user_id uuid REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
     private BOOLEAN DEFAULT TRUE,
     description TEXT,

@@ -1,8 +1,8 @@
 -- +goose Up
 CREATE TABLE inventory (
     id SERIAL PRIMARY KEY,
-    user_id uuid NOT NULL REFERENCES users(id),
-    product_id INT NOT NULL REFERENCES food_registry(product_id),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INT NOT NULL REFERENCES food_registry(product_id) ON DELETE CASCADE,
     expiration_date DATE,
     is_opened BOOLEAN DEFAULT FALSE,
     current_quantity FLOAT NOT NULL,
