@@ -3,7 +3,7 @@
 //   sqlc v1.27.0
 // source: recipe_ingredients.sql
 
-package database
+package repository
 
 import (
 	"context"

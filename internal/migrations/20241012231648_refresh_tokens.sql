@@ -5,10 +5,10 @@ CREATE TABLE refresh_tokens (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
     revoked_at TIMESTAMP DEFAULT NULL, -- invalidation by the server
-    revocation_reason TEXT DEFAULT NULL
+    revocation_reason TEXT DEFAULT NULL,
     logged_out_at TIMESTAMP DEFAULT NULL, -- invalidation by the user
     user_agent TEXT NOT NULL,
-    ip_address TEXT NOT NULL,
+    ip_address TEXT NOT NULL
 );
 
 -- +goose Down

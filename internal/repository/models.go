@@ -2,9 +2,10 @@
 // versions:
 //   sqlc v1.27.0
 
-package database
+package repository
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -35,7 +36,7 @@ type FoodRegistry struct {
 
 type Inventory struct {
 	ID              int32
-	UserID          pgtype.UUID
+	UserID          uuid.UUID
 	ProductID       int32
 	ExpirationDate  pgtype.Date
 	IsOpened        pgtype.Bool
@@ -48,7 +49,7 @@ type Inventory struct {
 
 type InventoryItemWithInfo struct {
 	ID                     int32
-	UserID                 pgtype.UUID
+	UserID                 uuid.UUID
 	ProductID              int32
 	ExpirationDate         pgtype.Date
 	IsOpened               pgtype.Bool
@@ -104,8 +105,25 @@ type RecipeIngredient struct {
 	Quantity  float64
 }
 
+type RefreshToken struct {
+	Token            string
+	UserID           pgtype.UUID
+	CreatedAt        pgtype.Timestamp
+	ExpiresAt        pgtype.Timestamp
+	RevokedAt        pgtype.Timestamp
+	RevocationReason pgtype.Text
+	LoggedOutAt      pgtype.Timestamp
+	UserAgent        string
+	IpAddress        string
+}
+
+type Role struct {
+	ID   uuid.UUID
+	Role pgtype.Text
+}
+
 type User struct {
-	ID            pgtype.UUID
+	ID            uuid.UUID
 	Username      string
 	Email         string
 	PasswordHash  string

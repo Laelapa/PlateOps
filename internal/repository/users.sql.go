@@ -3,12 +3,12 @@
 //   sqlc v1.27.0
 // source: users.sql
 
-package database
+package repository
 
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -47,7 +47,7 @@ DELETE FROM users
 WHERE id = $1
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, deleteUser, id)
 	return err
 }
@@ -58,7 +58,7 @@ SET active_account=FALSE, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) DisableUser(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) DisableUser(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, disableUser, id)
 	return err
 }
@@ -69,7 +69,7 @@ SET active_account=TRUE, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) EnableUser(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) EnableUser(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, enableUser, id)
 	return err
 }
@@ -124,9 +124,9 @@ FROM users
 WHERE email = $1
 `
 
-func (q *Queries) GetUserIdByEmail(ctx context.Context, email string) (pgtype.UUID, error) {
+func (q *Queries) GetUserIdByEmail(ctx context.Context, email string) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, getUserIdByEmail, email)
-	var id pgtype.UUID
+	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
 }
@@ -137,9 +137,9 @@ FROM users
 WHERE username = $1
 `
 
-func (q *Queries) GetUserIdByUsername(ctx context.Context, username string) (pgtype.UUID, error) {
+func (q *Queries) GetUserIdByUsername(ctx context.Context, username string) (uuid.UUID, error) {
 	row := q.db.QueryRow(ctx, getUserIdByUsername, username)
-	var id pgtype.UUID
+	var id uuid.UUID
 	err := row.Scan(&id)
 	return id, err
 }
@@ -151,7 +151,7 @@ WHERE id = $1
 `
 
 type UpdateUserParams struct {
-	ID       pgtype.UUID
+	ID       uuid.UUID
 	Username string
 	Email    string
 }
@@ -168,7 +168,7 @@ WHERE id = $1
 `
 
 type UpdateUserEmailParams struct {
-	ID    pgtype.UUID
+	ID    uuid.UUID
 	Email string
 }
 
@@ -183,7 +183,7 @@ SET last_login = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP
 WHERE id = $1
 `
 
-func (q *Queries) UpdateUserLastLogin(ctx context.Context, id pgtype.UUID) error {
+func (q *Queries) UpdateUserLastLogin(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.Exec(ctx, updateUserLastLogin, id)
 	return err
 }
@@ -195,7 +195,7 @@ WHERE id = $1
 `
 
 type UpdateUserPasswordParams struct {
-	ID           pgtype.UUID
+	ID           uuid.UUID
 	PasswordHash string
 }
 
@@ -211,7 +211,7 @@ WHERE id = $1
 `
 
 type UpdateUserUsernameParams struct {
-	ID       pgtype.UUID
+	ID       uuid.UUID
 	Username string
 }
 

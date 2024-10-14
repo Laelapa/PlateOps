@@ -19,18 +19,21 @@ import (
 func main() {
 	ctx := context.Background()
 	if err := actualMain(ctx, os.Stdout, os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, "ERROR: ", err)
+		fmt.Fprintln(os.Stderr, "FATAL: ", err)
 		os.Exit(1)
 	}
 }
 
-func actualMain(ctx context.Context, w io.Writer, args []string) error {
+func actualMain(osSignalCtx context.Context, w io.Writer, args []string) error {
 	// Handle OS signals gracefully
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	osSignalCtx, cancel := signal.NotifyContext(osSignalCtx, os.Interrupt)
 	defer cancel()
 
 	// Loading the .env contents
-	godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		return err
+	}
 
 	// Creating a database connection pool
 	dbPool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))

@@ -3,11 +3,12 @@
 //   sqlc v1.27.0
 // source: inventory.sql
 
-package database
+package repository
 
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -23,7 +24,7 @@ INSERT INTO inventory (
 `
 
 type CreateInventoryItemParams struct {
-	UserID          pgtype.UUID
+	UserID          uuid.UUID
 	ProductID       int32
 	ExpirationDate  pgtype.Date
 	CurrentQuantity float64
@@ -216,7 +217,7 @@ WHERE user_id = $1
 `
 
 // inventory_item_with_info is a view that combines the data in the inventory table with the generic info for that product from the food_registry table
-func (q *Queries) GetInventoryOfUser(ctx context.Context, userID pgtype.UUID) ([]InventoryItemWithInfo, error) {
+func (q *Queries) GetInventoryOfUser(ctx context.Context, userID uuid.UUID) ([]InventoryItemWithInfo, error) {
 	rows, err := q.db.Query(ctx, getInventoryOfUser, userID)
 	if err != nil {
 		return nil, err
