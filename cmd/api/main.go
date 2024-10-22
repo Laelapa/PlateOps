@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
+	"log"
 	"os"
 	"os/signal"
 
-	"github.com/DemetriusPapas/PlateOps/internal/database"
+	"github.com/DemetriusPapas/PlateOps/internal/app"
+	"github.com/DemetriusPapas/PlateOps/internal/logging"
+	"github.com/DemetriusPapas/PlateOps/internal/repository"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
@@ -15,34 +17,43 @@ import (
 	_ "github.com/jackc/pgx/v5"
 )
 
-// Using main() as a thin wrapper around actualMain()
+// Using main() as a thin wrapper around run()
 func main() {
-	ctx := context.Background()
-	if err := actualMain(ctx, os.Stdout, os.Args); err != nil {
-		fmt.Fprintln(os.Stderr, "FATAL: ", err)
-		os.Exit(1)
+	
+	if err := run(); err != nil {
+		log.Fatalf("FATAL: %v\n", err)
 	}
 }
 
-func actualMain(osSignalCtx context.Context, w io.Writer, args []string) error {
-	// Handle OS signals gracefully
-	osSignalCtx, cancel := signal.NotifyContext(osSignalCtx, os.Interrupt)
+func run() error {
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	// Loading the .env contents
 	err := godotenv.Load()
 	if err != nil {
-		return err
+		return fmt.Errorf("could not load env: %v", err) // FIXME: do something more reasonable
 	}
 
-	// Creating a database connection pool
-	dbPool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
+	// TODO: More configurable init based on .env options / Integrate viper
+
+	logger, err := logging.NewLogger(os.Getenv("ENVIRONMENT"))
 	if err != nil {
-		return err
+		return fmt.Errorf("could not initialize zap logger: %v", err) // FIXME: do something more reasonable
+	}
+
+	dbPool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
+	if err != nil {
+		return fmt.Errorf("error initializing database pool: %v", err)
 	}
 	defer dbPool.Close()
 
-	dbQuery := database.New(dbPool)
+	queries := repository.New(dbPool)
 
-	return nil //TODO: Placeholder value
+	app := app.New(ctx, logger, queries)
+	if err = app.LaunchServer(); err != nil {
+		return fmt.Errorf("error launching server: %v", err)
+	}
+
+	return nil
 }

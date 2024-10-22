@@ -26,13 +26,13 @@ INSERT INTO recipes (
 `
 
 type CreateRecipeParams struct {
-	UserID       pgtype.UUID
-	Name         string
-	Private      pgtype.Bool
-	Description  pgtype.Text
-	Instructions pgtype.Text
-	UnitType     string
-	Quantity     pgtype.Int4
+	UserID       pgtype.UUID `json:"user_id"`
+	Name         string      `json:"name"`
+	Private      pgtype.Bool `json:"private"`
+	Description  pgtype.Text `json:"description"`
+	Instructions pgtype.Text `json:"instructions"`
+	UnitType     string      `json:"unit_type"`
+	Quantity     pgtype.Int4 `json:"quantity"`
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
@@ -167,8 +167,8 @@ WHERE user_id = $1 AND name = $2
 `
 
 type GetRecipesByUserAndNameParams struct {
-	UserID pgtype.UUID
-	Name   string
+	UserID pgtype.UUID `json:"user_id"`
+	Name   string      `json:"name"`
 }
 
 func (q *Queries) GetRecipesByUserAndName(ctx context.Context, arg GetRecipesByUserAndNameParams) ([]Recipe, error) {
@@ -235,23 +235,23 @@ WHERE id = $1
 `
 
 type UpdateRecipeParams struct {
-	ID                  int32
-	UserID              pgtype.UUID
-	Name                string
-	Private             pgtype.Bool
-	Description         pgtype.Text
-	Instructions        pgtype.Text
-	UnitType            string
-	Quantity            pgtype.Int4
-	NutrientsPerPortion pgtype.Bool
-	Calories            pgtype.Numeric
-	Fats                pgtype.Numeric
-	Saturated           pgtype.Numeric
-	Carbs               pgtype.Numeric
-	Sugars              pgtype.Numeric
-	Protein             pgtype.Numeric
-	Fiber               pgtype.Numeric
-	Sodium              pgtype.Numeric
+	ID                  int32          `json:"id"`
+	UserID              pgtype.UUID    `json:"user_id"`
+	Name                string         `json:"name"`
+	Private             pgtype.Bool    `json:"private"`
+	Description         pgtype.Text    `json:"description"`
+	Instructions        pgtype.Text    `json:"instructions"`
+	UnitType            string         `json:"unit_type"`
+	Quantity            pgtype.Int4    `json:"quantity"`
+	NutrientsPerPortion pgtype.Bool    `json:"nutrients_per_portion"`
+	Calories            pgtype.Numeric `json:"calories"`
+	Fats                pgtype.Numeric `json:"fats"`
+	Saturated           pgtype.Numeric `json:"saturated"`
+	Carbs               pgtype.Numeric `json:"carbs"`
+	Sugars              pgtype.Numeric `json:"sugars"`
+	Protein             pgtype.Numeric `json:"protein"`
+	Fiber               pgtype.Numeric `json:"fiber"`
+	Sodium              pgtype.Numeric `json:"sodium"`
 }
 
 func (q *Queries) UpdateRecipe(ctx context.Context, arg UpdateRecipeParams) error {

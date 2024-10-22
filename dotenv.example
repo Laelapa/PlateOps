@@ -1,5 +1,6 @@
 # `ENVIRONMENT=dev` enables API endpoints to do "dev" things like resetting the database.
-ENVIRONMENT=dev
+ENVIRONMENT=dev|development|test|testing|prod|production
+SERVER_SHUTDOWN_TIMEOUT=5 #Time in seconds the server has to gracefully shut down before forced closing
 POSTGRES_USER=pguser
 POSTGRES_PASSWORD=pgpassword
 POSTGRES_PORT=5432

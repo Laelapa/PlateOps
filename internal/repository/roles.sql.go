@@ -22,8 +22,8 @@ RETURNING id, role
 `
 
 type CreateRoleParams struct {
-	ID   uuid.UUID
-	Role pgtype.Text
+	ID   uuid.UUID   `json:"id"`
+	Role pgtype.Text `json:"role"`
 }
 
 func (q *Queries) CreateRole(ctx context.Context, arg CreateRoleParams) (Role, error) {
@@ -53,8 +53,8 @@ WHERE id = $1
 `
 
 type UpdateRoleParams struct {
-	ID   uuid.UUID
-	Role pgtype.Text
+	ID   uuid.UUID   `json:"id"`
+	Role pgtype.Text `json:"role"`
 }
 
 func (q *Queries) UpdateRole(ctx context.Context, arg UpdateRoleParams) error {

@@ -21,9 +21,9 @@ RETURNING id, recipe_id, product_id, quantity
 `
 
 type CreateRecipeIngredientParams struct {
-	RecipeID  pgtype.Int4
-	ProductID pgtype.Int4
-	Quantity  float64
+	RecipeID  pgtype.Int4 `json:"recipe_id"`
+	ProductID pgtype.Int4 `json:"product_id"`
+	Quantity  float64     `json:"quantity"`
 }
 
 func (q *Queries) CreateRecipeIngredient(ctx context.Context, arg CreateRecipeIngredientParams) (RecipeIngredient, error) {
@@ -135,8 +135,8 @@ WHERE id = $1
 `
 
 type UpdateRecipeIngredientParams struct {
-	ID       int32
-	Quantity float64
+	ID       int32   `json:"id"`
+	Quantity float64 `json:"quantity"`
 }
 
 func (q *Queries) UpdateRecipeIngredient(ctx context.Context, arg UpdateRecipeIngredientParams) error {

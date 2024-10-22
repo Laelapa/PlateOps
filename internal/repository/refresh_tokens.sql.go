@@ -24,11 +24,11 @@ INSERT INTO refresh_tokens (
 `
 
 type CreateRefreshTokenParams struct {
-	Token     string
-	UserID    pgtype.UUID
-	ExpiresAt pgtype.Timestamp
-	UserAgent string
-	IpAddress string
+	Token     string           `json:"token"`
+	UserID    pgtype.UUID      `json:"user_id"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
+	UserAgent string           `json:"user_agent"`
+	IpAddress string           `json:"ip_address"`
 }
 
 func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error) {
@@ -167,8 +167,8 @@ WHERE token = $1
 `
 
 type RevokeTokenParams struct {
-	Token            string
-	RevocationReason pgtype.Text
+	Token            string      `json:"token"`
+	RevocationReason pgtype.Text `json:"revocation_reason"`
 }
 
 func (q *Queries) RevokeToken(ctx context.Context, arg RevokeTokenParams) error {
@@ -183,8 +183,8 @@ WHERE ip_address = $1
 `
 
 type RevokeTokensOfIpParams struct {
-	IpAddress        string
-	RevocationReason pgtype.Text
+	IpAddress        string      `json:"ip_address"`
+	RevocationReason pgtype.Text `json:"revocation_reason"`
 }
 
 func (q *Queries) RevokeTokensOfIp(ctx context.Context, arg RevokeTokensOfIpParams) error {
@@ -199,8 +199,8 @@ WHERE user_id = $1
 `
 
 type RevokeTokensOfUserParams struct {
-	UserID           pgtype.UUID
-	RevocationReason pgtype.Text
+	UserID           pgtype.UUID `json:"user_id"`
+	RevocationReason pgtype.Text `json:"revocation_reason"`
 }
 
 func (q *Queries) RevokeTokensOfUser(ctx context.Context, arg RevokeTokensOfUserParams) error {

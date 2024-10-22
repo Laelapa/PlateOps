@@ -10,125 +10,125 @@ import (
 )
 
 type FoodRegistry struct {
-	ProductID              int32
-	Name                   string
-	Gtin                   pgtype.Text
-	Category               pgtype.Text
-	Description            pgtype.Text
-	UnitType               string
-	Quantity               pgtype.Int4
-	PortionCount           pgtype.Int4
-	ExpirationAfterOpening pgtype.Int4
-	NutrientsPerItem       pgtype.Bool
-	Calories               pgtype.Numeric
-	Fats                   pgtype.Numeric
-	Saturated              pgtype.Numeric
-	Carbs                  pgtype.Numeric
-	Sugars                 pgtype.Numeric
-	Protein                pgtype.Numeric
-	Fiber                  pgtype.Numeric
-	Sodium                 pgtype.Numeric
-	CreatedAt              pgtype.Timestamp
-	UpdatedAt              pgtype.Timestamp
-	CreatedBy              pgtype.UUID
-	UpdatedBy              pgtype.UUID
+	ProductID              int32            `json:"product_id"`
+	Name                   string           `json:"name"`
+	Gtin                   pgtype.Text      `json:"gtin"`
+	Category               pgtype.Text      `json:"category"`
+	Description            pgtype.Text      `json:"description"`
+	UnitType               string           `json:"unit_type"`
+	Quantity               pgtype.Int4      `json:"quantity"`
+	PortionCount           pgtype.Int4      `json:"portion_count"`
+	ExpirationAfterOpening pgtype.Int4      `json:"expiration_after_opening"`
+	NutrientsPerItem       pgtype.Bool      `json:"nutrients_per_item"`
+	Calories               pgtype.Numeric   `json:"calories"`
+	Fats                   pgtype.Numeric   `json:"fats"`
+	Saturated              pgtype.Numeric   `json:"saturated"`
+	Carbs                  pgtype.Numeric   `json:"carbs"`
+	Sugars                 pgtype.Numeric   `json:"sugars"`
+	Protein                pgtype.Numeric   `json:"protein"`
+	Fiber                  pgtype.Numeric   `json:"fiber"`
+	Sodium                 pgtype.Numeric   `json:"sodium"`
+	CreatedAt              pgtype.Timestamp `json:"created_at"`
+	UpdatedAt              pgtype.Timestamp `json:"updated_at"`
+	CreatedBy              pgtype.UUID      `json:"created_by"`
+	UpdatedBy              pgtype.UUID      `json:"updated_by"`
 }
 
 type Inventory struct {
-	ID              int32
-	UserID          uuid.UUID
-	ProductID       int32
-	ExpirationDate  pgtype.Date
-	IsOpened        pgtype.Bool
-	CurrentQuantity float64
-	PurchaseDate    pgtype.Timestamp
-	OpenedDate      pgtype.Timestamp
-	CreatedAt       pgtype.Timestamp
-	UpdatedAt       pgtype.Timestamp
+	ID              int32            `json:"id"`
+	UserID          uuid.UUID        `json:"user_id"`
+	ProductID       int32            `json:"product_id"`
+	ExpirationDate  pgtype.Date      `json:"expiration_date"`
+	IsOpened        pgtype.Bool      `json:"is_opened"`
+	CurrentQuantity float64          `json:"current_quantity"`
+	PurchaseDate    pgtype.Timestamp `json:"purchase_date"`
+	OpenedDate      pgtype.Timestamp `json:"opened_date"`
+	CreatedAt       pgtype.Timestamp `json:"created_at"`
+	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
 }
 
 type InventoryItemWithInfo struct {
-	ID                     int32
-	UserID                 uuid.UUID
-	ProductID              int32
-	ExpirationDate         pgtype.Date
-	IsOpened               pgtype.Bool
-	CurrentQuantity        float64
-	PurchaseDate           pgtype.Timestamp
-	OpenedDate             pgtype.Timestamp
-	CreatedAt              pgtype.Timestamp
-	UpdatedAt              pgtype.Timestamp
-	Name                   string
-	Gtin                   pgtype.Text
-	Category               pgtype.Text
-	Description            pgtype.Text
-	UnitType               string
-	Quantity               pgtype.Int4
-	ExpirationAfterOpening pgtype.Int4
-	NutrientsPerItem       pgtype.Bool
-	Calories               pgtype.Numeric
-	Fats                   pgtype.Numeric
-	Saturated              pgtype.Numeric
-	Carbs                  pgtype.Numeric
-	Sugars                 pgtype.Numeric
-	Protein                pgtype.Numeric
-	Fiber                  pgtype.Numeric
-	Sodium                 pgtype.Numeric
+	ID                     int32            `json:"id"`
+	UserID                 uuid.UUID        `json:"user_id"`
+	ProductID              int32            `json:"product_id"`
+	ExpirationDate         pgtype.Date      `json:"expiration_date"`
+	IsOpened               pgtype.Bool      `json:"is_opened"`
+	CurrentQuantity        float64          `json:"current_quantity"`
+	PurchaseDate           pgtype.Timestamp `json:"purchase_date"`
+	OpenedDate             pgtype.Timestamp `json:"opened_date"`
+	CreatedAt              pgtype.Timestamp `json:"created_at"`
+	UpdatedAt              pgtype.Timestamp `json:"updated_at"`
+	Name                   string           `json:"name"`
+	Gtin                   pgtype.Text      `json:"gtin"`
+	Category               pgtype.Text      `json:"category"`
+	Description            pgtype.Text      `json:"description"`
+	UnitType               string           `json:"unit_type"`
+	Quantity               pgtype.Int4      `json:"quantity"`
+	ExpirationAfterOpening pgtype.Int4      `json:"expiration_after_opening"`
+	NutrientsPerItem       pgtype.Bool      `json:"nutrients_per_item"`
+	Calories               pgtype.Numeric   `json:"calories"`
+	Fats                   pgtype.Numeric   `json:"fats"`
+	Saturated              pgtype.Numeric   `json:"saturated"`
+	Carbs                  pgtype.Numeric   `json:"carbs"`
+	Sugars                 pgtype.Numeric   `json:"sugars"`
+	Protein                pgtype.Numeric   `json:"protein"`
+	Fiber                  pgtype.Numeric   `json:"fiber"`
+	Sodium                 pgtype.Numeric   `json:"sodium"`
 }
 
 type Recipe struct {
-	ID                  int32
-	UserID              pgtype.UUID
-	Name                string
-	Private             pgtype.Bool
-	Description         pgtype.Text
-	Instructions        pgtype.Text
-	UnitType            string
-	Quantity            pgtype.Int4
-	NutrientsPerPortion pgtype.Bool
-	Calories            pgtype.Numeric
-	Fats                pgtype.Numeric
-	Saturated           pgtype.Numeric
-	Carbs               pgtype.Numeric
-	Sugars              pgtype.Numeric
-	Protein             pgtype.Numeric
-	Fiber               pgtype.Numeric
-	Sodium              pgtype.Numeric
-	CreatedAt           pgtype.Timestamp
-	UpdatedAt           pgtype.Timestamp
+	ID                  int32            `json:"id"`
+	UserID              pgtype.UUID      `json:"user_id"`
+	Name                string           `json:"name"`
+	Private             pgtype.Bool      `json:"private"`
+	Description         pgtype.Text      `json:"description"`
+	Instructions        pgtype.Text      `json:"instructions"`
+	UnitType            string           `json:"unit_type"`
+	Quantity            pgtype.Int4      `json:"quantity"`
+	NutrientsPerPortion pgtype.Bool      `json:"nutrients_per_portion"`
+	Calories            pgtype.Numeric   `json:"calories"`
+	Fats                pgtype.Numeric   `json:"fats"`
+	Saturated           pgtype.Numeric   `json:"saturated"`
+	Carbs               pgtype.Numeric   `json:"carbs"`
+	Sugars              pgtype.Numeric   `json:"sugars"`
+	Protein             pgtype.Numeric   `json:"protein"`
+	Fiber               pgtype.Numeric   `json:"fiber"`
+	Sodium              pgtype.Numeric   `json:"sodium"`
+	CreatedAt           pgtype.Timestamp `json:"created_at"`
+	UpdatedAt           pgtype.Timestamp `json:"updated_at"`
 }
 
 type RecipeIngredient struct {
-	ID        int32
-	RecipeID  pgtype.Int4
-	ProductID pgtype.Int4
-	Quantity  float64
+	ID        int32       `json:"id"`
+	RecipeID  pgtype.Int4 `json:"recipe_id"`
+	ProductID pgtype.Int4 `json:"product_id"`
+	Quantity  float64     `json:"quantity"`
 }
 
 type RefreshToken struct {
-	Token            string
-	UserID           pgtype.UUID
-	CreatedAt        pgtype.Timestamp
-	ExpiresAt        pgtype.Timestamp
-	RevokedAt        pgtype.Timestamp
-	RevocationReason pgtype.Text
-	LoggedOutAt      pgtype.Timestamp
-	UserAgent        string
-	IpAddress        string
+	Token            string           `json:"token"`
+	UserID           pgtype.UUID      `json:"user_id"`
+	CreatedAt        pgtype.Timestamp `json:"created_at"`
+	ExpiresAt        pgtype.Timestamp `json:"expires_at"`
+	RevokedAt        pgtype.Timestamp `json:"revoked_at"`
+	RevocationReason pgtype.Text      `json:"revocation_reason"`
+	LoggedOutAt      pgtype.Timestamp `json:"logged_out_at"`
+	UserAgent        string           `json:"user_agent"`
+	IpAddress        string           `json:"ip_address"`
 }
 
 type Role struct {
-	ID   uuid.UUID
-	Role pgtype.Text
+	ID   uuid.UUID   `json:"id"`
+	Role pgtype.Text `json:"role"`
 }
 
 type User struct {
-	ID            uuid.UUID
-	Username      string
-	Email         string
-	PasswordHash  string
-	CreatedAt     pgtype.Timestamp
-	UpdatedAt     pgtype.Timestamp
-	LastLogin     pgtype.Timestamp
-	ActiveAccount pgtype.Bool
+	ID            uuid.UUID        `json:"id"`
+	Username      string           `json:"username"`
+	Email         string           `json:"email"`
+	PasswordHash  string           `json:"password_hash"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
+	UpdatedAt     pgtype.Timestamp `json:"updated_at"`
+	LastLogin     pgtype.Timestamp `json:"last_login"`
+	ActiveAccount pgtype.Bool      `json:"active_account"`
 }

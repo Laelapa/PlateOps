@@ -24,10 +24,10 @@ INSERT INTO inventory (
 `
 
 type CreateInventoryItemParams struct {
-	UserID          uuid.UUID
-	ProductID       int32
-	ExpirationDate  pgtype.Date
-	CurrentQuantity float64
+	UserID          uuid.UUID   `json:"user_id"`
+	ProductID       int32       `json:"product_id"`
+	ExpirationDate  pgtype.Date `json:"expiration_date"`
+	CurrentQuantity float64     `json:"current_quantity"`
 }
 
 func (q *Queries) CreateInventoryItem(ctx context.Context, arg CreateInventoryItemParams) (Inventory, error) {
@@ -273,8 +273,8 @@ WHERE id = $1
 `
 
 type InventoryItemAlterQuantityParams struct {
-	ID              int32
-	CurrentQuantity float64
+	ID              int32   `json:"id"`
+	CurrentQuantity float64 `json:"current_quantity"`
 }
 
 func (q *Queries) InventoryItemAlterQuantity(ctx context.Context, arg InventoryItemAlterQuantityParams) error {
@@ -321,10 +321,10 @@ WHERE id = $1
 `
 
 type UpdateInventoryItemParams struct {
-	ID             int32
-	ProductID      int32
-	ExpirationDate pgtype.Date
-	PurchaseDate   pgtype.Timestamp
+	ID             int32            `json:"id"`
+	ProductID      int32            `json:"product_id"`
+	ExpirationDate pgtype.Date      `json:"expiration_date"`
+	PurchaseDate   pgtype.Timestamp `json:"purchase_date"`
 }
 
 func (q *Queries) UpdateInventoryItem(ctx context.Context, arg UpdateInventoryItemParams) error {

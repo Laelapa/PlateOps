@@ -21,9 +21,9 @@ RETURNING id, username, email, password_hash, created_at, updated_at, last_login
 `
 
 type CreateUserParams struct {
-	Username     string
-	Email        string
-	PasswordHash string
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	PasswordHash string `json:"password_hash"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -151,9 +151,9 @@ WHERE id = $1
 `
 
 type UpdateUserParams struct {
-	ID       uuid.UUID
-	Username string
-	Email    string
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
+	Email    string    `json:"email"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
@@ -168,8 +168,8 @@ WHERE id = $1
 `
 
 type UpdateUserEmailParams struct {
-	ID    uuid.UUID
-	Email string
+	ID    uuid.UUID `json:"id"`
+	Email string    `json:"email"`
 }
 
 func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
@@ -195,8 +195,8 @@ WHERE id = $1
 `
 
 type UpdateUserPasswordParams struct {
-	ID           uuid.UUID
-	PasswordHash string
+	ID           uuid.UUID `json:"id"`
+	PasswordHash string    `json:"password_hash"`
 }
 
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
@@ -211,8 +211,8 @@ WHERE id = $1
 `
 
 type UpdateUserUsernameParams struct {
-	ID       uuid.UUID
-	Username string
+	ID       uuid.UUID `json:"id"`
+	Username string    `json:"username"`
 }
 
 func (q *Queries) UpdateUserUsername(ctx context.Context, arg UpdateUserUsernameParams) error {

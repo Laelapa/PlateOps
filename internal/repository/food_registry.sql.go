@@ -37,24 +37,24 @@ INSERT INTO food_registry (
 `
 
 type CreateFoodEntryParams struct {
-	Name                   string
-	Gtin                   pgtype.Text
-	Category               pgtype.Text
-	Description            pgtype.Text
-	UnitType               string
-	Quantity               pgtype.Int4
-	PortionCount           pgtype.Int4
-	ExpirationAfterOpening pgtype.Int4
-	NutrientsPerItem       pgtype.Bool
-	Calories               pgtype.Numeric
-	Fats                   pgtype.Numeric
-	Saturated              pgtype.Numeric
-	Carbs                  pgtype.Numeric
-	Sugars                 pgtype.Numeric
-	Protein                pgtype.Numeric
-	Fiber                  pgtype.Numeric
-	Sodium                 pgtype.Numeric
-	CreatedBy              pgtype.UUID
+	Name                   string         `json:"name"`
+	Gtin                   pgtype.Text    `json:"gtin"`
+	Category               pgtype.Text    `json:"category"`
+	Description            pgtype.Text    `json:"description"`
+	UnitType               string         `json:"unit_type"`
+	Quantity               pgtype.Int4    `json:"quantity"`
+	PortionCount           pgtype.Int4    `json:"portion_count"`
+	ExpirationAfterOpening pgtype.Int4    `json:"expiration_after_opening"`
+	NutrientsPerItem       pgtype.Bool    `json:"nutrients_per_item"`
+	Calories               pgtype.Numeric `json:"calories"`
+	Fats                   pgtype.Numeric `json:"fats"`
+	Saturated              pgtype.Numeric `json:"saturated"`
+	Carbs                  pgtype.Numeric `json:"carbs"`
+	Sugars                 pgtype.Numeric `json:"sugars"`
+	Protein                pgtype.Numeric `json:"protein"`
+	Fiber                  pgtype.Numeric `json:"fiber"`
+	Sodium                 pgtype.Numeric `json:"sodium"`
+	CreatedBy              pgtype.UUID    `json:"created_by"`
 }
 
 func (q *Queries) CreateFoodEntry(ctx context.Context, arg CreateFoodEntryParams) (FoodRegistry, error) {
@@ -312,25 +312,25 @@ WHERE product_id = $1
 `
 
 type UpdateFoodEntryParams struct {
-	ProductID              int32
-	Name                   string
-	Gtin                   pgtype.Text
-	Category               pgtype.Text
-	Description            pgtype.Text
-	UnitType               string
-	Quantity               pgtype.Int4
-	PortionCount           pgtype.Int4
-	ExpirationAfterOpening pgtype.Int4
-	NutrientsPerItem       pgtype.Bool
-	Calories               pgtype.Numeric
-	Fats                   pgtype.Numeric
-	Saturated              pgtype.Numeric
-	Carbs                  pgtype.Numeric
-	Sugars                 pgtype.Numeric
-	Protein                pgtype.Numeric
-	Fiber                  pgtype.Numeric
-	Sodium                 pgtype.Numeric
-	UpdatedBy              pgtype.UUID
+	ProductID              int32          `json:"product_id"`
+	Name                   string         `json:"name"`
+	Gtin                   pgtype.Text    `json:"gtin"`
+	Category               pgtype.Text    `json:"category"`
+	Description            pgtype.Text    `json:"description"`
+	UnitType               string         `json:"unit_type"`
+	Quantity               pgtype.Int4    `json:"quantity"`
+	PortionCount           pgtype.Int4    `json:"portion_count"`
+	ExpirationAfterOpening pgtype.Int4    `json:"expiration_after_opening"`
+	NutrientsPerItem       pgtype.Bool    `json:"nutrients_per_item"`
+	Calories               pgtype.Numeric `json:"calories"`
+	Fats                   pgtype.Numeric `json:"fats"`
+	Saturated              pgtype.Numeric `json:"saturated"`
+	Carbs                  pgtype.Numeric `json:"carbs"`
+	Sugars                 pgtype.Numeric `json:"sugars"`
+	Protein                pgtype.Numeric `json:"protein"`
+	Fiber                  pgtype.Numeric `json:"fiber"`
+	Sodium                 pgtype.Numeric `json:"sodium"`
+	UpdatedBy              pgtype.UUID    `json:"updated_by"`
 }
 
 func (q *Queries) UpdateFoodEntry(ctx context.Context, arg UpdateFoodEntryParams) error {
