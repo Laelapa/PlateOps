@@ -40,3 +40,6 @@ docs/dev/
 
 # VSCode files
 .vscode/
+
+# Local configuration files
+.directory
