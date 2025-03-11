@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/DemetriusPapas/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/internal/repository"
 	"go.uber.org/zap"
 )
 
@@ -37,8 +37,8 @@ func New(
 	ctx context.Context,
 	logger *zap.SugaredLogger,
 	queries *repository.Queries,
-	) *App {
-	
+) *App {
+
 	return &App{
 		ctx:     ctx,
 		logger:  logger,
@@ -67,7 +67,7 @@ func newMux() http.Handler {
 // attachBasicMiddleware wraps the provided handler with common middleware
 // functions used across all routes.
 func attachBasicMiddleware(handler http.Handler) http.Handler {
-	
+
 	// TODO: handler = middleware(handler)
 
 	return handler
@@ -94,7 +94,7 @@ func (app *App) LaunchServer() error {
 	defer close(errChan)
 
 	go func() {
-		
+
 		app.logger.Infof("Server running on %s", app.server.Addr)
 		if err := app.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			app.logger.Errorf("Error by ListenAndServe(): %v\n", err)

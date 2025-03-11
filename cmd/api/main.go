@@ -10,9 +10,9 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/DemetriusPapas/PlateOps/internal/app"
-	"github.com/DemetriusPapas/PlateOps/internal/logging"
-	"github.com/DemetriusPapas/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/internal/app"
+	"github.com/Laelapa/PlateOps/internal/logging"
+	"github.com/Laelapa/PlateOps/internal/repository"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
