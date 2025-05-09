@@ -3,7 +3,8 @@ package routes
 import (
 	"net/http"
 
-	"github.com/Laelapa/GoHome/internal/routes/handlers"
+	"github.com/Laelapa/PlateOps/internal/routes/handlers"
+
 	"github.com/Laelapa/GoHome/logging"
 )
 
@@ -22,11 +23,6 @@ func Setup(staticDir string, logger *logging.Logger) *http.ServeMux {
 	}
 
 	mux.Handle("GET /static/", fileServer)
-	mux.HandleFunc("GET /", h.HandleGetHome)
-	mux.HandleFunc("GET /about", h.HandleGetAbout)
-	mux.HandleFunc("GET /stack", h.HandleGetStack)
-	mux.HandleFunc("GET /projects", h.HandleUnderConstruction)
-	mux.HandleFunc("GET /blog", h.HandleUnderConstruction)
 	mux.HandleFunc("GET /health", h.HandleGetHealth)
 
 	return mux
