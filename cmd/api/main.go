@@ -96,12 +96,12 @@ func run() error {
 		)
 	}
 
-		app := app.New(
+	app := app.New(
 		ctx,
 		logger,
+		queries,
 		os.Getenv("SERVER_PORT"),
 		os.Getenv("STATIC_DIR"), // FIXME: check if this is a valid path
-		queries,
 		shutdownTimeout,
 	)
 	if err = app.LaunchServer(); err != nil {
