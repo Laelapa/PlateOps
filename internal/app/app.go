@@ -66,7 +66,7 @@ func New(
 		queries: queries,
 		server: &http.Server{
 			Addr:              fmt.Sprintf(":%s", env.ValidatePort(port, logger)),
-			Handler:           newMux(staticDir, logger),
+			Handler:           newMux(staticDir, logger, queries),
 			ReadHeaderTimeout: defaultReadHeaderTimeout, // Prevents slow header attacks
 			ReadTimeout:       defaultReadTimeout,       // Prevents slow request attacks
 			WriteTimeout:      defaultWriteTimeout,      // Prevents clients from keeping connections open
@@ -80,9 +80,9 @@ func New(
 
 // newMux creates and configures the HTTP request multiplexer with all routes
 // and middleware attached.
-func newMux(staticDir string, logger *logging.Logger) http.Handler {
+func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries) http.Handler {
 
-	mux := routes.Setup(staticDir, logger)
+	mux := routes.Setup(staticDir, logger, queries)
 
 	return attachBasicMiddleware(mux, logger)
 }
