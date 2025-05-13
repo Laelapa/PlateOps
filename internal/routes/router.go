@@ -7,7 +7,6 @@ import (
 	"github.com/Laelapa/PlateOps/internal/routes/handlers"
 
 	"github.com/Laelapa/GoHome/logging"
-	"github.com/Laelapa/guarddoggo"
 )
 
 // Setup initializes and returns a configured router with all application routes
@@ -15,15 +14,14 @@ import (
 //
 // Parameters:
 //   - staticDir: The directory containing static files to serve
-func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries, azor guarddoggo.GuardDoggo) *http.ServeMux {
+func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries) *http.ServeMux {
 
 	mux := http.NewServeMux()
 	fileServer := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
 
 	h := &handlers.Handler{
-		Logger:  logger,
+		Logger: logger,
 		Queries: queries,
-		Azor:    azor,
 	}
 
 	// Commented out routes are not implemented yet.

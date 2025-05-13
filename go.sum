@@ -1,14 +1,8 @@
 github.com/Laelapa/GoHome v0.1.2 h1:ch/Ec3IC3WwZPl7pjO1iCDfhikmWktTN64l00deJbLA=
 github.com/Laelapa/GoHome v0.1.2/go.mod h1:UwlAMhU8+NbxscgdL9t9Kv2KvwzQ5/UblgKzg4BOTJM=
-github.com/Laelapa/guarddoggo v0.0.0-20250227155006-aef5a81ac423 h1:73+zC0VbAnKzY648HB8pNZi3O5BivL4YrvuGgZcdUkg=
-github.com/Laelapa/guarddoggo v0.0.0-20250227155006-aef5a81ac423/go.mod h1:Zgk5tSDuQV5IH4oOSADq0EhfWzpqt59SvQuQENaQ2TE=
-github.com/Laelapa/guarddoggo v0.0.0-20250513004939-e9780f653763 h1:CcVlLp7LDcafD1Kj4Ng1+TsmZJxBiGpFxM1ncH3f2+U=
-github.com/Laelapa/guarddoggo v0.0.0-20250513004939-e9780f653763/go.mod h1:Zgk5tSDuQV5IH4oOSADq0EhfWzpqt59SvQuQENaQ2TE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/golang-jwt/jwt/v5 v5.2.2 h1:Rl4B7itRWVtYIHFrSNd7vhTiz9UpLdi6gZhZ3wEeDy8=
-github.com/golang-jwt/jwt/v5 v5.2.2/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=

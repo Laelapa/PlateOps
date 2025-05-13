@@ -13,20 +13,16 @@ import (
 
 	"github.com/Laelapa/PlateOps/internal/app"
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"go.uber.org/zap"
 
 	"github.com/Laelapa/GoHome/logging"
-	"github.com/Laelapa/guarddoggo"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 
 	_ "github.com/jackc/pgx/v5"
 )
 
 const (
-	DefaultShutdownTimeout = 5 * time.Second     // Time until forceful shutdown
-	DefaultRTokenSize      = 32                  // Size of the refresh token in bytes
-	DefaultRtokenTTL       = 30 * 24 * time.Hour // Time to live for the refresh token
-	DefaultJTokenTTL       = 5 * time.Minute     // Time to live for the JWT token
+	DefaultShutdownTimeout = 5 * time.Second // Time until forceful shutdown
 )
 
 // main serves as the entry point for the application and acts as a thin wrapper
@@ -90,24 +86,6 @@ func run() error {
 
 	queries := repository.New(dbPool)
 
-	// Adopt a guarddoggo trained in JWT and RT handling
-	azor := guarddoggo.Adopt()
-	azor, dogErr := azor.TrainedInJWT(
-		os.Getenv("JWT_SECRET"),
-		os.Getenv("SERVICE_NAME"),
-		DefaultJTokenTTL, // FIXME: make this configurable
-	)
-	if dogErr != nil {
-		return fmt.Errorf("error during token manager init: %w", err)
-	}
-	azor, dogErr = azor.TrainedInRT(
-		DefaultRTokenSize,
-		DefaultRtokenTTL,
-	)
-	if dogErr != nil {
-		return fmt.Errorf("error during token manager init: %w", err)
-	}
-
 	// Parse the server shutdown timeout from the environment
 	shutdownTimeout, err := time.ParseDuration(os.Getenv("SERVER_SHUTDOWN_TIMEOUT") + "s")
 	if err != nil {
@@ -122,7 +100,6 @@ func run() error {
 		ctx,
 		logger,
 		queries,
-		azor,
 		os.Getenv("SERVER_PORT"),
 		os.Getenv("STATIC_DIR"), // FIXME: check if this is a valid path
 		shutdownTimeout,
