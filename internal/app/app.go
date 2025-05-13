@@ -16,6 +16,7 @@ import (
 	"github.com/Laelapa/PlateOps/internal/routes"
 
 	"github.com/Laelapa/GoHome/logging"
+	"github.com/Laelapa/guarddoggo"
 	"go.uber.org/zap"
 )
 
@@ -27,6 +28,7 @@ type App struct {
 	ctx           context.Context
 	logger        *logging.Logger
 	queries       *repository.Queries
+	azor          guarddoggo.GuardDoggo
 	server        *http.Server
 	serverOptions *serverOptions
 }
@@ -50,6 +52,7 @@ func New(
 	ctx context.Context,
 	logger *logging.Logger,
 	queries *repository.Queries,
+	azor guarddoggo.GuardDoggo,
 	port string,
 	staticDir string,
 	shutdownTimeout time.Duration,
@@ -64,9 +67,10 @@ func New(
 		ctx:     ctx,
 		logger:  logger,
 		queries: queries,
+		azor:    azor,
 		server: &http.Server{
 			Addr:              fmt.Sprintf(":%s", env.ValidatePort(port, logger)),
-			Handler:           newMux(staticDir, logger, queries),
+			Handler:           newMux(staticDir, logger, queries, azor),
 			ReadHeaderTimeout: defaultReadHeaderTimeout, // Prevents slow header attacks
 			ReadTimeout:       defaultReadTimeout,       // Prevents slow request attacks
 			WriteTimeout:      defaultWriteTimeout,      // Prevents clients from keeping connections open
@@ -80,9 +84,9 @@ func New(
 
 // newMux creates and configures the HTTP request multiplexer with all routes
 // and middleware attached.
-func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries) http.Handler {
+func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries, azor guarddoggo.GuardDoggo) http.Handler {
 
-	mux := routes.Setup(staticDir, logger, queries)
+	mux := routes.Setup(staticDir, logger, queries, azor)
 
 	return attachBasicMiddleware(mux, logger)
 }

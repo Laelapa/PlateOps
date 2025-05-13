@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/Laelapa/guarddoggo"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
