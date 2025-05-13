@@ -6,6 +6,13 @@ import (
 )
 
 type Handler struct {
-	Logger  *logging.Logger
-	Queries *repository.Queries
+	logger  *logging.Logger
+	queries *repository.Queries
+}
+
+func New(logger *logging.Logger, queries *repository.Queries) *Handler {
+	return &Handler{
+		logger:  logger,
+		queries: queries,
+	}
 }

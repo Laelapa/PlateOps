@@ -19,10 +19,7 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	mux := http.NewServeMux()
 	fileServer := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
 
-	h := &handlers.Handler{
-		Logger: logger,
-		Queries: queries,
-	}
+	h := handlers.New(logger, queries)
 
 	// Commented out routes are not implemented yet.
 	// They will be serving HTML pages in the future.

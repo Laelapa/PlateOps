@@ -28,40 +28,40 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	var rBody signupRequest
 	ctx := r.Context()
 
-	h.Logger.LogRequestInfo("Processing signup request", r)
+	h.logger.LogRequestInfo("Processing signup request", r)
 
 	// Decode the request body.
 	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
-		h.Logger.LogRequestError("Error decoding request body", r, err)
+		h.logger.LogRequestError("Error decoding request body", r, err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
 	// Validate the contents.
 	if err := validateSignupRequest(rBody); err != nil {
-		h.Logger.LogRequestError("Invalid signup request", r, err)
+		h.logger.LogRequestError("Invalid signup request", r, err)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
 	// Check username availability.
-	if _, err := h.Queries.GetUserByUsername(ctx, rBody.Username); err == nil {
-		h.Logger.LogRequestError("Username already taken", r, err)
+	if _, err := h.queries.GetUserByUsername(ctx, rBody.Username); err == nil {
+		h.logger.LogRequestError("Username already taken", r, err)
 		http.Error(w, "Username already taken", http.StatusConflict)
 		return
 	} else if !errors.Is(err, pgx.ErrNoRows) {
-		h.Logger.LogAppError("Error checking username", err, zap.String("username", rBody.Username))
+		h.logger.LogAppError("Error checking username", err, zap.String("username", rBody.Username))
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
 
 	// Check email availability.
-	if _, err := h.Queries.GetUserByEmail(ctx, rBody.Email); err == nil {
-		h.Logger.LogRequestError("Email already taken", r, err)
+	if _, err := h.queries.GetUserByEmail(ctx, rBody.Email); err == nil {
+		h.logger.LogRequestError("Email already taken", r, err)
 		http.Error(w, "Email already taken", http.StatusConflict)
 		return
 	} else if !errors.Is(err, pgx.ErrNoRows) {
-		h.Logger.LogAppError("Error checking email", err, zap.String("email", rBody.Email))
+		h.logger.LogAppError("Error checking email", err, zap.String("email", rBody.Email))
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -69,7 +69,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	// Hash the password.
 	hashedPwd, err := bcrypt.GenerateFromPassword([]byte(rBody.Password), 14)
 	if err != nil {
-		h.Logger.LogAppError("Error hashing password", err)
+		h.logger.LogAppError("Error hashing password", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -81,9 +81,9 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		PasswordHash: string(hashedPwd),
 	}
 
-	user, err := h.Queries.CreateUser(ctx, createParams)
+	user, err := h.queries.CreateUser(ctx, createParams)
 	if err != nil {
-		h.Logger.LogAppError("Failed to create user", err,
+		h.logger.LogAppError("Failed to create user", err,
 			zap.String("username", rBody.Username),
 			zap.String("email", rBody.Email),
 		)
@@ -92,7 +92,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Respond with the created user.
-
+	// TODO: response with user id and tokens
 }
 
 func validateSignupRequest(rBody signupRequest) error {
