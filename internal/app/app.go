@@ -5,11 +5,18 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/Laelapa/PlateOps/auth/tokenauthority"
+	"github.com/Laelapa/PlateOps/internal/env"
+	"github.com/Laelapa/PlateOps/internal/middleware"
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/internal/routes"
+
+	"github.com/Laelapa/GoHome/logging"
 	"go.uber.org/zap"
 )
 
@@ -18,12 +25,20 @@ type serverOptions struct {
 }
 
 type App struct {
-	ctx           context.Context
-	logger        *zap.SugaredLogger
-	queries       *repository.Queries
-	server        *http.Server
-	serverOptions *serverOptions
+	ctx            context.Context
+	logger         *logging.Logger
+	queries        *repository.Queries
+	tokenAuthority *tokenauthority.TokenAuthority
+	server         *http.Server
+	serverOptions  *serverOptions
 }
+
+const (
+	defaultReadHeaderTimeout = 10 * time.Second
+	defaultReadTimeout       = 30 * time.Second
+	defaultWriteTimeout      = 30 * time.Second
+	defaultIdleTimeout       = 120 * time.Second
+)
 
 // New creates and returns a new App instance with the provided dependencies.
 // It initializes the HTTP server with default configuration and prepares it
@@ -35,17 +50,31 @@ type App struct {
 //   - queries: Database query interface for data operations
 func New(
 	ctx context.Context,
-	logger *zap.SugaredLogger,
+	logger *logging.Logger,
 	queries *repository.Queries,
+	tokenAuthority *tokenauthority.TokenAuthority,
+	port string,
+	staticDir string,
+	shutdownTimeout time.Duration,
 ) *App {
 
+	if staticDir == "" {
+		logger.LogAppWarn("Static directory not specified, using default directory 'static'")
+		staticDir = "static"
+	}
+
 	return &App{
-		ctx:     ctx,
-		logger:  logger,
-		queries: queries,
+		ctx:            ctx,
+		logger:         logger,
+		queries:        queries,
+		tokenAuthority: tokenAuthority,
 		server: &http.Server{
-			Addr:    ":8080", // TODO: grab from .env instead
-			Handler: newMux(),
+			Addr:              fmt.Sprintf(":%s", env.ValidatePort(port, logger)),
+			Handler:           newMux(staticDir, logger, queries, tokenAuthority),
+			ReadHeaderTimeout: defaultReadHeaderTimeout, // Prevents slow header attacks
+			ReadTimeout:       defaultReadTimeout,       // Prevents slow request attacks
+			WriteTimeout:      defaultWriteTimeout,      // Prevents clients from keeping connections open
+			IdleTimeout:       defaultIdleTimeout,       // Closes idle connections
 		},
 		serverOptions: &serverOptions{
 			shutdownTimeout: 5 * time.Second,
@@ -55,20 +84,20 @@ func New(
 
 // newMux creates and configures the HTTP request multiplexer with all routes
 // and middleware attached.
-func newMux() http.Handler {
+func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries, tokenAuthority *tokenauthority.TokenAuthority) http.Handler {
 
-	var mux http.Handler = http.NewServeMux()
-	// TODO: setup routes
-	mux = attachBasicMiddleware(mux)
+	mux := routes.Setup(staticDir, logger, queries, tokenAuthority)
 
-	return mux
+	return attachBasicMiddleware(mux, logger, tokenAuthority)
 }
 
 // attachBasicMiddleware wraps the provided handler with common middleware
 // functions used across all routes.
-func attachBasicMiddleware(handler http.Handler) http.Handler {
+func attachBasicMiddleware(handler http.Handler, logger *logging.Logger, tokenAuthority *tokenauthority.TokenAuthority) http.Handler {
 
-	// TODO: handler = middleware(handler)
+	handler = middleware.SecurityResponseHeaders(handler)
+	handler = middleware.CacheControlHeader(handler)
+	handler = middleware.RequestLogger(handler, logger)
 
 	return handler
 }
@@ -81,6 +110,10 @@ func attachBasicMiddleware(handler http.Handler) http.Handler {
 func (app *App) SetServerShutdownTimeout(t time.Duration) {
 
 	app.serverOptions.shutdownTimeout = t
+	app.logger.LogAppInfo(
+		"Server shutdown timeout set",
+		zap.Duration(logging.FieldDuration, t),
+	)
 }
 
 // LaunchServer starts the HTTP server and manages its lifecycle. It will run
@@ -95,9 +128,12 @@ func (app *App) LaunchServer() error {
 
 	go func() {
 
-		app.logger.Infof("Server running on %s", app.server.Addr)
+		app.logger.LogAppInfo(
+			"Server running",
+			zap.String(logging.FieldServerAddr, app.server.Addr),
+		)
 		if err := app.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			app.logger.Errorf("Error by ListenAndServe(): %v\n", err)
+			app.logger.LogAppError("Error thrown by ListenAndServe", err)
 			errChan <- err
 		}
 	}()
@@ -109,6 +145,7 @@ func (app *App) LaunchServer() error {
 
 	case <-app.ctx.Done():
 
+		app.logger.LogAppInfo("Shutting down server")
 		app.ShutdownServer()
 		return nil
 	}
@@ -122,12 +159,13 @@ func (app *App) ShutdownServer() {
 	ctxServerShutdown, cancel := context.WithTimeout(context.Background(), app.serverOptions.shutdownTimeout)
 	defer cancel()
 
-	if err := app.server.Shutdown(ctxServerShutdown); err != nil && err != http.ErrServerClosed {
-		app.logger.Errorf("Error during server shutdown: %v\n", err)
-		app.logger.Infof("Closing server forcefully\n")
-		app.server.Close()
+	if err := app.server.Shutdown(ctxServerShutdown); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		app.logger.LogAppError("Error during server shutdown", err)
+		app.logger.LogAppWarn("Closing server forcefully")
+		if closeErr := app.server.Close(); closeErr != nil {
+			app.logger.LogAppError("Error during forced server close", closeErr)
+		}
 	} else {
-		app.logger.Infof("Server shut down successfully\n")
+		app.logger.LogAppInfo("Server shut down successfully")
 	}
-
 }
