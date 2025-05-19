@@ -6,11 +6,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func StdTimeToPgtypeTimestamp(t time.Time) pgtype.Timestamp {
+func TimeToPgtypeTimestamp(t time.Time) pgtype.Timestamp {
 	return pgtype.Timestamp{
-		Time:  t,
+		Time:             t,
 		InfinityModifier: pgtype.Finite,
-		Valid: true,
+		Valid:            true,
 	}
 }
 
