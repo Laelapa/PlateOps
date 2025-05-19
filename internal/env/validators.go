@@ -3,9 +3,8 @@ package env
 import (
 	"strconv"
 
-	"go.uber.org/zap"
-
 	"github.com/Laelapa/GoHome/logging"
+	"go.uber.org/zap"
 )
 
 const defaultPort = "8080"
