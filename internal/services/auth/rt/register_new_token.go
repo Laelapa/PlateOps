@@ -13,11 +13,11 @@ import (
 )
 
 type Params struct {
-	userID    uuid.UUID
-	token     string
-	expiresAt time.Time
-	userAgent string
-	ipAddress string
+	UserID    uuid.UUID
+	Token     string
+	ExpiresAt time.Time
+	UserAgent string
+	IPAddress string
 }
 
 // RegisterNewToken registers a new refresh token with the database.
@@ -31,11 +31,11 @@ type Params struct {
 func RegisterNewToken(queries *repository.Queries, logger *logging.Logger, params Params) error {
 
 	rParams := repository.CreateRefreshTokenParams{
-		Token:     params.token,
-		UserID:    typeconvert.GoogleUUIDToPgtypeUUID(params.userID),
-		ExpiresAt: typeconvert.TimeToPgtypeTimestamp(params.expiresAt),
-		UserAgent: params.userAgent,
-		IpAddress: params.ipAddress,
+		Token:     params.Token,
+		UserID:    typeconvert.GoogleUUIDToPgtypeUUID(params.UserID),
+		ExpiresAt: typeconvert.TimeToPgtypeTimestamp(params.ExpiresAt),
+		UserAgent: params.UserAgent,
+		IpAddress: params.IPAddress,
 	}
 
 	rt, err := queries.CreateRefreshToken(context.Background(), rParams)
@@ -43,7 +43,7 @@ func RegisterNewToken(queries *repository.Queries, logger *logging.Logger, param
 		logger.LogAppError(
 			"Repository error registering refresh token",
 			err,
-			zap.String("token", params.token),
+			zap.String("token", params.Token),
 		)
 		return err
 	}

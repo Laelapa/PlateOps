@@ -6,13 +6,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
-func (t *TokenAuthority) IssueJWT(userID string) (signedToken string, err error) {
+func (t *TokenAuthority) IssueJWT(userID uuid.UUID) (signedToken string, err error) {
 
 	claims := jwt.RegisteredClaims{
 		Issuer:    t.jwtIssuer,
-		Subject:   userID,
+		Subject:   userID.String(),
 		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(t.jwtLifetime)),
 	}

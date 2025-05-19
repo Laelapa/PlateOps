@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
+	"github.com/Laelapa/PlateOps/util/net"
 
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
@@ -30,6 +32,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	var rBody signupRequest
 	ctx := r.Context()
 
+	// TODO: Consider deescalating log level.
 	h.logger.LogRequestInfo("Processing signup request", r)
 
 	// Decode the request body.
@@ -94,7 +97,58 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with the success message and user tokens.
+	// Generate and register auth tokens.
+
+	// Generate the refresh token.
+	rToken, rtExpiresAt, err := h.tokenAuthority.IssueRT()
+	if err != nil {
+		h.logger.LogAppError("Failed to issue refresh token", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Register the refresh token.
+	rtParams := rt.Params{
+		UserID:    user.ID,
+		Token:     rToken,
+		ExpiresAt: rtExpiresAt,
+		UserAgent: r.UserAgent(),
+		IPAddress: net.GetFlyClientIP(r),
+	}
+	if err := rt.RegisterNewToken(h.queries, h.logger, rtParams); err != nil {
+		h.logger.LogAppError("Failed to register refresh token", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Generate the JWT.
+	jwt, err := h.tokenAuthority.IssueJWT(user.ID)
+	if err != nil {
+		h.logger.LogAppError("Failed to issue JWT", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Create the response.
+	resp := signupResponse{
+		Success:      true,
+		Message:      "User created successfully",
+		JWT:          jwt,
+		RefreshToken: rToken,
+	}
+
+	respMarshalled, err := json.Marshal(resp)
+	if err != nil {
+		h.logger.LogAppError("Failed to marshal response", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(respMarshalled)
+
+	// TODO: Consider deescalating log level.
+	h.logger.LogRequestInfo("Signup request processed successfully", r)
 
 }
 
