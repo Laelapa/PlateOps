@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/env"
 	"github.com/Laelapa/PlateOps/internal/middleware"
 	"github.com/Laelapa/PlateOps/internal/repository"
@@ -24,11 +25,12 @@ type serverOptions struct {
 }
 
 type App struct {
-	ctx           context.Context
-	logger        *logging.Logger
-	queries       *repository.Queries
-	server        *http.Server
-	serverOptions *serverOptions
+	ctx            context.Context
+	logger         *logging.Logger
+	queries        *repository.Queries
+	tokenAuthority *tokenauthority.TokenAuthority
+	server         *http.Server
+	serverOptions  *serverOptions
 }
 
 const (
@@ -50,6 +52,7 @@ func New(
 	ctx context.Context,
 	logger *logging.Logger,
 	queries *repository.Queries,
+	tokenAuthority *tokenauthority.TokenAuthority,
 	port string,
 	staticDir string,
 	shutdownTimeout time.Duration,
@@ -61,12 +64,13 @@ func New(
 	}
 
 	return &App{
-		ctx:     ctx,
-		logger:  logger,
-		queries: queries,
+		ctx:            ctx,
+		logger:         logger,
+		queries:        queries,
+		tokenAuthority: tokenAuthority,
 		server: &http.Server{
 			Addr:              fmt.Sprintf(":%s", env.ValidatePort(port, logger)),
-			Handler:           newMux(staticDir, logger, queries),
+			Handler:           newMux(staticDir, logger, queries, tokenAuthority),
 			ReadHeaderTimeout: defaultReadHeaderTimeout, // Prevents slow header attacks
 			ReadTimeout:       defaultReadTimeout,       // Prevents slow request attacks
 			WriteTimeout:      defaultWriteTimeout,      // Prevents clients from keeping connections open
@@ -80,16 +84,16 @@ func New(
 
 // newMux creates and configures the HTTP request multiplexer with all routes
 // and middleware attached.
-func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries) http.Handler {
+func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries, tokenAuthority *tokenauthority.TokenAuthority) http.Handler {
 
-	mux := routes.Setup(staticDir, logger, queries)
+	mux := routes.Setup(staticDir, logger, queries, tokenAuthority)
 
-	return attachBasicMiddleware(mux, logger)
+	return attachBasicMiddleware(mux, logger, tokenAuthority)
 }
 
 // attachBasicMiddleware wraps the provided handler with common middleware
 // functions used across all routes.
-func attachBasicMiddleware(handler http.Handler, logger *logging.Logger) http.Handler {
+func attachBasicMiddleware(handler http.Handler, logger *logging.Logger, tokenAuthority *tokenauthority.TokenAuthority) http.Handler {
 
 	handler = middleware.SecurityResponseHeaders(handler)
 	handler = middleware.CacheControlHeader(handler)

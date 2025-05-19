@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
+
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -18,9 +19,10 @@ type signupRequest struct {
 }
 
 type signupResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message,omitempty"`
-	// TODO: return token
+	Success      bool   `json:"success"`
+	Message      string `json:"message,omitempty"`
+	JWT          string `json:"jwt,omitempty"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +51,8 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		h.logger.LogRequestError("Username already taken", r, err)
 		http.Error(w, "Username already taken", http.StatusConflict)
 		return
-	} else if !errors.Is(err, pgx.ErrNoRows) {
+	} else if !errors.Is(err, pgx.ErrNoRows) { // Check for errors other than `pgx.ErrNoRows`.
+		// If the error WAS `pgx.ErrNoRows`, it would mean the username is available.
 		h.logger.LogAppError("Error checking username", err, zap.String("username", rBody.Username))
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -60,7 +63,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		h.logger.LogRequestError("Email already taken", r, err)
 		http.Error(w, "Email already taken", http.StatusConflict)
 		return
-	} else if !errors.Is(err, pgx.ErrNoRows) {
+	} else if !errors.Is(err, pgx.ErrNoRows) { // Similar to username flow.
 		h.logger.LogAppError("Error checking email", err, zap.String("email", rBody.Email))
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
@@ -91,8 +94,8 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with the created user.
-	// TODO: response with user id and tokens
+	// Respond with the success message and user tokens.
+
 }
 
 func validateSignupRequest(rBody signupRequest) error {

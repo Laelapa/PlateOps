@@ -11,18 +11,22 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/app"
 	"github.com/Laelapa/PlateOps/internal/repository"
-	"go.uber.org/zap"
 
 	"github.com/Laelapa/GoHome/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 
 	_ "github.com/jackc/pgx/v5"
 )
 
 const (
-	DefaultShutdownTimeout = 5 * time.Second // Time until forceful shutdown
+	defaultShutdownTimeout = 5 * time.Second    // Time until forceful shutdown
+	jwtLifetime            = 3 * time.Minute    // Lifetime of the JWT token
+	rtLifetime             = 7 * 24 * time.Hour // (7 days) Lifetime of the refresh token
+	rtSizeInBytes          = 32
 )
 
 // main serves as the entry point for the application and acts as a thin wrapper
@@ -86,10 +90,18 @@ func run() error {
 
 	queries := repository.New(dbPool)
 
+	tokenAuthority, err := tokenauthority.New(
+		os.Getenv("JWT_SECRET"),
+		os.Getenv("SERVICE_NAME"),
+		jwtLifetime,
+		rtSizeInBytes,
+		rtLifetime,
+	)
+
 	// Parse the server shutdown timeout from the environment
 	shutdownTimeout, err := time.ParseDuration(os.Getenv("SERVER_SHUTDOWN_TIMEOUT") + "s")
 	if err != nil {
-		shutdownTimeout = DefaultShutdownTimeout // fallback default
+		shutdownTimeout = defaultShutdownTimeout // fallback default
 		logger.LogAppWarn(
 			"Failed to parse SERVER_SHUTDOWN_TIMEOUT, falling back to default",
 			zap.Duration("shutdown timeout", shutdownTimeout),
@@ -100,6 +112,7 @@ func run() error {
 		ctx,
 		logger,
 		queries,
+		tokenAuthority,
 		os.Getenv("SERVER_PORT"),
 		os.Getenv("STATIC_DIR"), // FIXME: check if this is a valid path
 		shutdownTimeout,
