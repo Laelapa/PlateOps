@@ -46,7 +46,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the contents.
 	if err := validateSignupRequest(rBody); err != nil {
-		h.logger.LogRequestError("Invalid signup request", r, err)
+		h.logger.LogAppInfo("Invalid signup request contents", zap.Error(err))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -54,7 +54,11 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	// Check username availability.
 	// TODO: Consider spinning it of into a separate util function for code clarity.
 	if _, err := h.queries.GetUserByUsername(ctx, rBody.Username); err == nil {
-		h.logger.LogRequestError("Username already taken", r, err)
+		h.logger.LogAppInfo(
+			"Username already taken",
+			zap.String("request_username", rBody.Username),
+			zap.Error(err),
+		)
 		http.Error(w, "Username already taken", http.StatusConflict)
 		return
 	} else if !errors.Is(err, pgx.ErrNoRows) { // Check for errors other than `pgx.ErrNoRows`.
@@ -67,7 +71,11 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	// Check email availability.
 	// TODO: Consider spinning it of into a separate util function for code clarity.
 	if _, err := h.queries.GetUserByEmail(ctx, rBody.Email); err == nil {
-		h.logger.LogRequestError("Email already taken", r, err)
+		h.logger.LogAppInfo(
+			"Email already taken",
+			zap.String("request_email", rBody.Email),
+			zap.Error(err),
+		)
 		http.Error(w, "Email already taken", http.StatusConflict)
 		return
 	} else if !errors.Is(err, pgx.ErrNoRows) { // Similar to username flow.

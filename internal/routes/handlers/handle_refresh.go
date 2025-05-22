@@ -9,6 +9,7 @@ import (
 	"github.com/Laelapa/PlateOps/util/auth"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type refreshRequest struct {
@@ -41,7 +42,7 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the contents.
 	if err := validateRefreshRequest(rBody); err != nil {
-		h.logger.LogRequestError("Invalid token refresh request", r, err)
+		h.logger.LogAppInfo("Invalid token refresh request", zap.Error(err))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -62,7 +63,13 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.logger.LogRequestError("Token verification failed", r, err)
+		h.logger.LogAppWarn(
+			"Token verification failed",
+			zap.String("request_refresh_token", rBody.RefreshToken),
+			zap.String("request_user_id", rBody.UserID.String()),
+			zap.String("request_user_agent", userAgent),
+			zap.String("request_ip_address", ipAddress),
+			zap.Error(err))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
