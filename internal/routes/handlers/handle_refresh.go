@@ -35,7 +35,8 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the request body.
 	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
-		h.logger.LogRequestError("Error decoding request body", r, err)
+		h.logger.LogRequestWarn("Couldn't decode request body", r)
+		h.logger.LogAppWarn("Couldn't decode request body", zap.Error(err))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
