@@ -8,6 +8,7 @@ import (
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
+	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
@@ -21,10 +22,11 @@ type signupRequest struct {
 }
 
 type signupResponse struct {
-	Success      bool   `json:"success"`
-	Message      string `json:"message,omitempty"`
-	JWT          string `json:"jwt,omitempty"`
-	RefreshToken string `json:"refresh_token,omitempty"`
+	Success      bool      `json:"success"`
+	Message      string    `json:"message,omitempty"`
+	UserID       uuid.UUID `json:"user_id,omitempty"`
+	JWT          string    `json:"jwt,omitempty"`
+	RefreshToken string    `json:"refresh_token,omitempty"`
 }
 
 func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +52,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check username availability.
+	// TODO: Consider spinning it of into a separate util function for code clarity.
 	if _, err := h.queries.GetUserByUsername(ctx, rBody.Username); err == nil {
 		h.logger.LogRequestError("Username already taken", r, err)
 		http.Error(w, "Username already taken", http.StatusConflict)
@@ -62,6 +65,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check email availability.
+	// TODO: Consider spinning it of into a separate util function for code clarity.
 	if _, err := h.queries.GetUserByEmail(ctx, rBody.Email); err == nil {
 		h.logger.LogRequestError("Email already taken", r, err)
 		http.Error(w, "Email already taken", http.StatusConflict)
@@ -133,6 +137,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	resp := signupResponse{
 		Success:      true,
 		Message:      "User created successfully",
+		UserID:       user.ID,
 		JWT:          jwt,
 		RefreshToken: rToken,
 	}
