@@ -28,6 +28,7 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	mux.HandleFunc("GET /health", h.HandleGetHealth)
 	// -- mux.HandleFunc("GET /signup", h.HandleGetSignup)
 	mux.HandleFunc("POST /signup", h.HandlePostSignup)
+	mux.HandleFunc("POST /refresh", h.HandlePostRefresh)
 	// -- mux.HandleFunc("GET /login", h.HandleGetLogin)
 	// mux.HandleFunc("POST /login", h.HandlePostLogin)
 	// mux.HandleFunc("POST /logout", h.HandleGetLogout)
