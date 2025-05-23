@@ -48,7 +48,11 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the contents.
 	if err := validateSignupRequest(rBody); err != nil {
-		h.logger.LogAppInfo("Invalid signup request contents", zap.Error(err))
+
+		logBody := rBody
+		logBody.Password = "[REDACTED]"
+
+		h.logger.LogAppInfo("Invalid signup request contents", zap.Error(err), zap.Any("request_body", logBody))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
