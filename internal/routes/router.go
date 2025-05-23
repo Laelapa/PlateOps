@@ -31,7 +31,7 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	mux.HandleFunc("POST /refresh", h.HandlePostRefresh)
 	// -- mux.HandleFunc("GET /login", h.HandleGetLogin)
 	mux.HandleFunc("POST /login", h.HandlePostLogin)
-	mux.HandleFunc("POST /logout", h.HandleGetLogout)
+	mux.HandleFunc("POST /logout", h.HandlePostLogout)
 	// -- mux.HandleFunc("GET /reset-password", h.HandleGetResetPassword)
 	// mux.HandleFunc("POST /reset-password", h.HandlePostResetPassword)
 

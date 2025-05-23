@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Laelapa/PlateOps/util/validate"
 	"go.uber.org/zap"
 )
 
@@ -31,7 +32,7 @@ func (h *Handler) HandlePostLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the contents.
-	if err := validateLogoutRequest(rBody); err != nil {
+	if err := validateLogoutRequest(rBody, h.tokenAuthority.GetRefreshTokenSizeInBytes()); err != nil {
 		h.logger.LogAppInfo("Invalid logout request contents", zap.Error(err))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
@@ -64,7 +65,11 @@ func (h *Handler) HandlePostLogout(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func validateLogoutRequest(rBody logoutRequest) error {
+func validateLogoutRequest(rBody logoutRequest, rtSizeInBytes int) error {
+
+	if err := validate.RefreshToken(rBody.RefreshToken, rtSizeInBytes); err != nil {
+		return err
+	}
 
 	return nil
 }

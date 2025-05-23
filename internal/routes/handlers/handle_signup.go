@@ -8,6 +8,7 @@ import (
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
+	"github.com/Laelapa/PlateOps/util/validate"
 	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v5"
@@ -166,14 +167,20 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// TODO: Also check for zero values, indicating wrong json fields in request.
+
 func validateSignupRequest(rBody signupRequest) error {
 
-	// TODO: Validate username, length, regex
+	if err := validate.Username(rBody.Username); err != nil {
+		return err
+	}
 
-	// TODO: Validate email, length, regex
+	if err := validate.Email(rBody.Email); err != nil {
+		return err
+	}
 
-	// TODO: Validate password, length (max 72 for bcrypt)
+	if err := validate.Password(rBody.Password); err != nil {
+		return err
+	}
 
 	return nil
 }

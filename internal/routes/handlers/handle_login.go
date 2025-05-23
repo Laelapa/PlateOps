@@ -7,6 +7,7 @@ import (
 
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
+	"github.com/Laelapa/PlateOps/util/validate"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
@@ -120,12 +121,15 @@ func (h *Handler) HandlePostLogin(w http.ResponseWriter, r *http.Request) {
 	h.logger.LogRequestInfo("Login request processed successfully", r)
 }
 
-// TODO: Also check for zero values, indicating wrong json fields in request.
 func validateLoginRequest(rBody loginRequest) error {
 
-	// TODO: Validate username, length, regex
+	if err := validate.Username(rBody.Username); err != nil {
+		return err
+	}
 
-	// TODO: Validate password, length (max 72 for bcrypt)
+	if err := validate.Password(rBody.Password); err != nil {
+		return err
+	}
 
 	return nil
 }
