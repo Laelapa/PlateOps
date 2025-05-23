@@ -14,6 +14,7 @@ import (
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/app"
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/joho/godotenv"
 
 	"github.com/Laelapa/GoHome/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -57,11 +58,11 @@ func run() error {
 	// Disabled for production, use your service's secrets instead
 	// Refer to the dotenv example file for the required environment variables
 	// Uncomment the following lines to load environment variables from a .env file in a local development environment
-	//
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	return fmt.Errorf("error loading .env file: %w", err)
-	// }
+
+	err := godotenv.Load()
+	if err != nil {
+		return fmt.Errorf("error loading .env file: %w", err)
+	}
 
 	// TODO: More configurable init based on .env options / Integrate viper
 

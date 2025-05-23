@@ -66,3 +66,7 @@ func (t *TokenAuthority) validateConfig() error {
 
 	return nil
 }
+
+func (t *TokenAuthority) GetRefreshTokenSizeInBytes() int {
+	return t.rtSizeInBytes
+}
