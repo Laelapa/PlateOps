@@ -102,6 +102,7 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// TODO: Also check for zero values, indicating wrong json fields in request.
 // validateRefreshRequest verifies that the contents of the received request are valid as far as allowed symbols and length are concerned.
 func validateRefreshRequest(rBody refreshRequest) error {
 

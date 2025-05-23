@@ -166,6 +166,7 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// TODO: Also check for zero values, indicating wrong json fields in request.
 func validateSignupRequest(rBody signupRequest) error {
 
 	// TODO: Validate username, length, regex
