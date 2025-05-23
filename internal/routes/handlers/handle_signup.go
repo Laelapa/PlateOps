@@ -8,6 +8,7 @@ import (
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
+	"github.com/Laelapa/PlateOps/util/validate"
 	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v5"
@@ -39,14 +40,19 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the request body.
 	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
-		h.logger.LogRequestError("Error decoding request body", r, err)
+		h.logger.LogRequestWarn("Couldn't decode request body", r)
+		h.logger.LogAppWarn("Couldn't decode request body", zap.Error(err))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
 	// Validate the contents.
 	if err := validateSignupRequest(rBody); err != nil {
-		h.logger.LogRequestError("Invalid signup request", r, err)
+
+		logBody := rBody
+		logBody.Password = "[REDACTED]"
+
+		h.logger.LogAppInfo("Invalid signup request contents", zap.Error(err), zap.Any("request_body", logBody))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -54,7 +60,11 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	// Check username availability.
 	// TODO: Consider spinning it of into a separate util function for code clarity.
 	if _, err := h.queries.GetUserByUsername(ctx, rBody.Username); err == nil {
-		h.logger.LogRequestError("Username already taken", r, err)
+		h.logger.LogAppInfo(
+			"Username already taken",
+			zap.String("request_username", rBody.Username),
+			zap.Error(err),
+		)
 		http.Error(w, "Username already taken", http.StatusConflict)
 		return
 	} else if !errors.Is(err, pgx.ErrNoRows) { // Check for errors other than `pgx.ErrNoRows`.
@@ -67,7 +77,11 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	// Check email availability.
 	// TODO: Consider spinning it of into a separate util function for code clarity.
 	if _, err := h.queries.GetUserByEmail(ctx, rBody.Email); err == nil {
-		h.logger.LogRequestError("Email already taken", r, err)
+		h.logger.LogAppInfo(
+			"Email already taken",
+			zap.String("request_email", rBody.Email),
+			zap.Error(err),
+		)
 		http.Error(w, "Email already taken", http.StatusConflict)
 		return
 	} else if !errors.Is(err, pgx.ErrNoRows) { // Similar to username flow.
@@ -157,13 +171,20 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 
 }
 
+
 func validateSignupRequest(rBody signupRequest) error {
 
-	// TODO: Validate username, length, regex
+	if err := validate.Username(rBody.Username); err != nil {
+		return err
+	}
 
-	// TODO: Validate email, length, regex
+	if err := validate.Email(rBody.Email); err != nil {
+		return err
+	}
 
-	// TODO: Validate password, length (max 72 for bcrypt)
+	if err := validate.Password(rBody.Password); err != nil {
+		return err
+	}
 
 	return nil
 }

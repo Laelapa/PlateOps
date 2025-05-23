@@ -8,7 +8,9 @@ import (
 
 	"github.com/Laelapa/PlateOps/util/auth"
 	"github.com/Laelapa/PlateOps/util/net"
+	"github.com/Laelapa/PlateOps/util/validate"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type refreshRequest struct {
@@ -34,14 +36,15 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 
 	// Decode the request body.
 	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
-		h.logger.LogRequestError("Error decoding request body", r, err)
+		h.logger.LogRequestWarn("Couldn't decode request body", r)
+		h.logger.LogAppWarn("Couldn't decode request body", zap.Error(err))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
 	// Validate the contents.
-	if err := validateRefreshRequest(rBody); err != nil {
-		h.logger.LogRequestError("Invalid token refresh request", r, err)
+	if err := validateRefreshRequest(rBody, h.tokenAuthority.GetRefreshTokenSizeInBytes()); err != nil {
+		h.logger.LogAppInfo("Invalid token refresh request", zap.Error(err), zap.String("request_user_id", rBody.UserID.String()))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -62,7 +65,13 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.logger.LogRequestError("Token verification failed", r, err)
+		h.logger.LogAppWarn(
+			"Token verification failed",
+			zap.String("request_refresh_token", rBody.RefreshToken),
+			zap.String("request_user_id", rBody.UserID.String()),
+			zap.String("request_user_agent", userAgent),
+			zap.String("request_ip_address", ipAddress),
+			zap.Error(err))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
@@ -94,12 +103,15 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// validateRefreshRequest verifies that the contents of the received request are valid as far as allowed symbols and length are concerned.
-func validateRefreshRequest(rBody refreshRequest) error {
+func validateRefreshRequest(rBody refreshRequest, rtSizeInBytes int) error {
 
-	// TODO: Validate username, length, regex
+	if err := validate.UUID(rBody.UserID); err != nil {
+		return err
+	}
 
-	// TODO: Validate refresh token, length, regex
+	if err := validate.RefreshToken(rBody.RefreshToken, rtSizeInBytes); err != nil {
+		return err
+	}
 
 	return nil
 }
