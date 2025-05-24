@@ -1,3 +1,4 @@
+// TODO: Note to future self: Good place to experiment with generics
 package validate
 
 import (
@@ -18,7 +19,7 @@ const (
 	realMin               = 0.0
 	realMax               = 1000000.0
 	stringMaxLength       = 255
-	textMaxLength         = 5000 // TEXT fields
+	textMaxLength         = 5000 // TEXT database fields
 )
 
 func RefreshToken(token string, length int) error {
@@ -94,6 +95,14 @@ func String(s string) error {
 	return nil
 }
 
+func Text(t string) error {
+	if len(t) > textMaxLength {
+		return ErrStringTooLong
+	}
+
+	return nil
+}
+
 func GTIN(gtin string) error {
 	if len(gtin) > gtinMaxLength {
 		return ErrGtinTooLong
@@ -116,6 +125,32 @@ func UnitType(t string) error {
 	// Unit type can be alphanumeric and underscores, but no special characters.
 	if !regex.AlphanumericAndBasicSymbols.MatchString(t) {
 		return ErrInvalidGtinFormat
+	}
+
+	return nil
+}
+
+// TODO: Figure out the specific unit types that are allowed
+
+func NonNegative[T ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64](n T) error {
+	if n < 0 {
+		return ErrValueOutOfBounds
+	}
+
+	return nil
+}
+
+func Positive[T ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64](n T) error {
+	if n <= 0 {
+		return ErrValueOutOfBounds
+	}
+
+	return nil
+}
+
+func Real(x float32) error {
+	if x < realMin || x > realMax {
+		return ErrValueOutOfBounds
 	}
 
 	return nil

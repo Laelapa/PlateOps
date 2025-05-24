@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
+	"github.com/Laelapa/PlateOps/internal/middleware"
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/internal/routes/handlers"
 
@@ -38,14 +39,13 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	// mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
 	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
-	mux.Handle("POST /food", middleware.AuthenticateWithJWT(tokenAuthority, logge, h.HandlePostFood))
+	mux.Handle("POST /food", middleware.AuthenticateWithJWT(tokenAuthority, logger)(http.HandlerFunc(h.HandlePostFood)))
 	// mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
-	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)	
+	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)
 
 	// mux.HandleFunc("GET /foods", h.HandleGetFoods)
 	// mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
 	// mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
-
 
 	return mux
 }

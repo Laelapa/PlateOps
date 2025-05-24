@@ -13,4 +13,5 @@ var (
 	ErrStringTooLong        = errors.New("string exceeds maximum length")
 	ErrGtinTooLong          = errors.New("GTIN exceeds maximum length")
 	ErrInvalidGtinFormat    = errors.New("invalid GTIN format")
+	ErrValueOutOfBounds     = errors.New("a value is out of bounds")
 )
