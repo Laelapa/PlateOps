@@ -35,16 +35,16 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	// -- mux.HandleFunc("GET /reset-password", h.HandleGetResetPassword)
 	// mux.HandleFunc("POST /reset-password", h.HandlePostResetPassword)
 
-	mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
-	mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
+	// mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
+	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
-	mux.HandleFunc("POST /food", h.HandlePostFood)
-	mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
-	mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)	
+	mux.Handle("POST /food", middleware.AuthenticateWithJWT(tokenAuthority, logge, h.HandlePostFood))
+	// mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
+	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)	
 
-	mux.HandleFunc("GET /foods", h.HandleGetFoods)
-	mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
-	mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
+	// mux.HandleFunc("GET /foods", h.HandleGetFoods)
+	// mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
+	// mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
 
 
 	return mux
