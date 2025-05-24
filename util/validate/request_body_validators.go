@@ -2,30 +2,23 @@ package validate
 
 import (
 	"errors"
-	"regexp"
 
+	"github.com/Laelapa/PlateOps/util/validate/regex"
 	guuid "github.com/google/uuid"
 )
 
 const (
-	usernameMinLength = 5
-	usernameMaxLength = 24
-	emailMaxLength    = 254
-	passwordMinLength = 8
-	passwordMaxLength = 72 // 72 mainly due to bcrypt
-)
-
-var (
-	ErrEmptyRefreshToken   = errors.New("refresh token is empty")
-	ErrInvalidRefreshToken = errors.New("invalid refresh token")
-	ErrInvalidUsername     = errors.New("invalid username")
-	ErrInvalidPassword     = errors.New("invalid password")
-	ErrEmptyEmail          = errors.New("email is empty")
-	ErrInvalidEmail        = errors.New("invalid email")
-
-	hexRegex      = regexp.MustCompile(`^[0-9a-f]+$`)
-	usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_.-]+$`)
-	emailRegex    = regexp.MustCompile(`^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9.]{2,}$`)
+	usernameMinLength     = 5
+	usernameMaxLength     = 24
+	emailMaxLength        = 254
+	passwordMinLength     = 8
+	passwordMaxLength     = 72 // 72 mainly due to bcrypt
+	foodUnitTypeMaxLength = 50
+	gtinMaxLength         = 14
+	realMin               = 0.0
+	realMax               = 1000000.0
+	stringMaxLength       = 255
+	textMaxLength         = 5000 // TEXT fields
 )
 
 func RefreshToken(token string, length int) error {
@@ -37,7 +30,7 @@ func RefreshToken(token string, length int) error {
 		return ErrInvalidRefreshToken
 	}
 
-	if !hexRegex.MatchString(token) {
+	if !regex.Hex.MatchString(token) {
 		return ErrInvalidRefreshToken
 	}
 
@@ -48,7 +41,7 @@ func Username(u string) error {
 	if len(u) < usernameMinLength || len(u) > usernameMaxLength {
 		return ErrInvalidUsername
 	}
-	if !usernameRegex.MatchString(u) {
+	if !regex.Username.MatchString(u) {
 		return ErrInvalidUsername
 	}
 
@@ -62,7 +55,7 @@ func Email(e string) error {
 	if len(e) > emailMaxLength {
 		return ErrInvalidEmail
 	}
-	if !emailRegex.MatchString(e) {
+	if !regex.Email.MatchString(e) {
 		return ErrInvalidEmail
 	}
 
@@ -80,6 +73,49 @@ func Password(p string) error {
 func UUID(id guuid.UUID) error {
 	if id == guuid.Nil {
 		return errors.New("invalid or missing UUID")
+	}
+
+	return nil
+}
+
+func StringRequired(s string) error {
+	if s == "" {
+		return ErrRequiredValueOmitted
+	}
+
+	return String(s)
+}
+
+func String(s string) error {
+	if len(s) > stringMaxLength {
+		return ErrStringTooLong
+	}
+
+	return nil
+}
+
+func GTIN(gtin string) error {
+	if len(gtin) > gtinMaxLength {
+		return ErrGtinTooLong
+	}
+
+	// GTIN can be numeric or alphanumeric, but must not contain special characters.
+	// Also, for consistency capitalization is enforced.
+	if !regex.AlphanumericCapitalized.MatchString(gtin) {
+		return ErrInvalidGtinFormat
+	}
+
+	return nil
+}
+
+func UnitType(t string) error {
+	if len(t) > foodUnitTypeMaxLength {
+		return ErrStringTooLong
+	}
+
+	// Unit type can be alphanumeric and underscores, but no special characters.
+	if !regex.AlphanumericAndBasicSymbols.MatchString(t) {
+		return ErrInvalidGtinFormat
 	}
 
 	return nil
