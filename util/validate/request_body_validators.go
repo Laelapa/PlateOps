@@ -127,10 +127,19 @@ func UnitType(t string) error {
 		return ErrInvalidGtinFormat
 	}
 
+	m := map[string]bool{
+		"grams":	true,
+		"ml":		true,
+		"items":	true,
+		"portions":	true,
+	}
+
+	if !m[t] {
+		return ErrInvalidUnitType
+	}
+
 	return nil
 }
-
-// TODO: Figure out the specific unit types that are allowed
 
 func NonNegative[T ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64](n T) error {
 	if n < 0 {
