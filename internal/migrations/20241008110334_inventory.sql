@@ -5,7 +5,7 @@ CREATE TABLE inventory (
     product_id INT NOT NULL REFERENCES food_registry(product_id) ON DELETE CASCADE,
     expiration_date DATE,
     is_opened BOOLEAN DEFAULT FALSE,
-    current_quantity FLOAT NOT NULL,
+    current_quantity REAL DEFAULT 0 NOT NULL,
     purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     opened_date TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
