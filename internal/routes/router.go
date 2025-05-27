@@ -36,6 +36,30 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
     	http.ServeFile(w, r, "docs/openapi.json")
 	})
 
+	// Add Swagger UI route
+mux.HandleFunc("GET /docs", func(w http.ResponseWriter, r *http.Request) {
+    html := `<!DOCTYPE html>
+	<html>
+		<head>
+    		<title>PlateOps API</title>
+    		<link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.22.0/swagger-ui.css" />
+		</head>
+		<body>
+    		<div id="swagger-ui"></div>
+    		<script src="https://unpkg.com/swagger-ui-dist@5.22.0/swagger-ui-bundle.js"></script>
+    		<script>
+        		SwaggerUIBundle({
+            		url: '/openapi.json',
+            		dom_id: '#swagger-ui',
+            		presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.presets.standalone]
+        		});
+    		</script>
+		</body>
+	</html>`
+    w.Header().Set("Content-Type", "text/html")
+    w.Write([]byte(html))
+})
+
 
 	mux.HandleFunc("GET /health", h.HandleGetHealth)
 	// -- mux.HandleFunc("GET /signup", h.HandleGetSignup)
