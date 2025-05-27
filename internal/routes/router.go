@@ -23,6 +23,11 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 
 	h := handlers.New(logger, queries, tokenAuthority)
 
+	// to simplify the mux.Handle parameters for authenticated routes
+	withAuth := func (handler func(http.ResponseWriter, *http.Request)) http.Handler {
+		return middleware.AuthenticateWithJWT(tokenAuthority, logger)(http.HandlerFunc(handler))
+	}
+
 	// -- Commented out routes are not implemented yet.
 	// They will be serving HTML pages in the future.
 	mux.Handle("GET /static/", fileServer)
@@ -39,7 +44,7 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	// mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
 	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
-	mux.Handle("POST /food", middleware.AuthenticateWithJWT(tokenAuthority, logger)(http.HandlerFunc(h.HandlePostFood)))
+	mux.Handle("POST /food", withAuth(h.HandlePostFood))
 	// mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
 	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)
 
