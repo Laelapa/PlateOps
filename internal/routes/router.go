@@ -31,6 +31,12 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	// -- Commented out routes are not implemented yet.
 	// They will be serving HTML pages in the future.
 	mux.Handle("GET /static/", fileServer)
+	mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {
+    	w.Header().Set("Content-Type", "application/json")
+    	http.ServeFile(w, r, "docs/openapi.json")
+	})
+
+
 	mux.HandleFunc("GET /health", h.HandleGetHealth)
 	// -- mux.HandleFunc("GET /signup", h.HandleGetSignup)
 	mux.HandleFunc("POST /signup", h.HandlePostSignup)
