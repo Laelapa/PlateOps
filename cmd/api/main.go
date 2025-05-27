@@ -25,7 +25,7 @@ import (
 
 const (
 	defaultShutdownTimeout = 5 * time.Second    // Time until forceful shutdown
-	jwtLifetime            = 3 * time.Minute    // Lifetime of the JWT token
+	jwtLifetime            = 3 * time.Hour    // Lifetime of the JWT token // TODO: make configurable (possibly by environment: hours/days for dev | minutes for live)
 	rtLifetime             = 7 * 24 * time.Hour // (7 days) Lifetime of the refresh token
 	rtSizeInBytes          = 32
 )
