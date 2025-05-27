@@ -1,6 +1,7 @@
 package net
 
 import (
+	"errors"
 	"net"
 	"net/http"
 )
@@ -32,4 +33,12 @@ func StripPort(ipAddress string) string {
 		return ipAddress
 	}
 	return host
+}
+
+func StripBearer(authHeader string) (string, error) {
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		return authHeader[7:], nil
+	}
+
+	return "", errors.New("Invalid authorization header format")
 }

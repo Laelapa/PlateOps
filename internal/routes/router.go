@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
+	"github.com/Laelapa/PlateOps/internal/middleware"
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/internal/routes/handlers"
 
@@ -22,6 +23,11 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 
 	h := handlers.New(logger, queries, tokenAuthority)
 
+	// to simplify the mux.Handle parameters for authenticated routes
+	withAuth := func (handler func(http.ResponseWriter, *http.Request)) http.Handler {
+		return middleware.AuthenticateWithJWT(tokenAuthority, logger)(http.HandlerFunc(handler))
+	}
+
 	// -- Commented out routes are not implemented yet.
 	// They will be serving HTML pages in the future.
 	mux.Handle("GET /static/", fileServer)
@@ -35,17 +41,16 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	// -- mux.HandleFunc("GET /reset-password", h.HandleGetResetPassword)
 	// mux.HandleFunc("POST /reset-password", h.HandlePostResetPassword)
 
-	mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
-	mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
+	// mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
+	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
-	mux.HandleFunc("POST /food", h.HandlePostFood)
-	mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
-	mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)	
+	mux.Handle("POST /food", withAuth(h.HandlePostFood))
+	// mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
+	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)
 
-	mux.HandleFunc("GET /foods", h.HandleGetFoods)
-	mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
-	mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
-
+	// mux.HandleFunc("GET /foods", h.HandleGetFoods)
+	// mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
+	// mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
 
 	return mux
 }
