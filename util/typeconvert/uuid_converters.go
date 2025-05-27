@@ -41,3 +41,22 @@ func PgtypeUUIDToString(pgUUID pgtype.UUID) string {
 		return gUUID.String()
 	}
 }
+
+// StringToPgtypeUUID converts a string to a pgtype.UUID.
+// If the string is empty or cannot be parsed as a UUID, it returns a pgtype.UUID with the field `Valid: false`.
+func StringToPgtypeUUID(s string) pgtype.UUID {
+	if s == "" {
+		return pgtype.UUID{
+			Valid: false,
+		}
+	}
+
+	gUUID, err := uuid.Parse(s)
+	if err != nil {
+		return pgtype.UUID{
+			Valid: false,
+		}
+	}
+
+	return GoogleUUIDToPgtypeUUID(gUUID)
+}
