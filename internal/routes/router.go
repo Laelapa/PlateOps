@@ -16,7 +16,12 @@ import (
 //
 // Parameters:
 //   - staticDir: The directory containing static files to serve
-func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries, tokenAuthority *tokenauthority.TokenAuthority) *http.ServeMux {
+func Setup(
+	staticDir string,
+	logger *logging.Logger,
+	queries *repository.Queries,
+	tokenAuthority *tokenauthority.TokenAuthority,
+) *http.ServeMux {
 
 	mux := http.NewServeMux()
 	fileServer := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
@@ -24,43 +29,17 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	h := handlers.New(logger, queries, tokenAuthority)
 
 	// to simplify the mux.Handle parameters for authenticated routes
-	withAuth := func (handler func(http.ResponseWriter, *http.Request)) http.Handler {
+	withAuth := func(handler func(http.ResponseWriter, *http.Request)) http.Handler {
 		return middleware.AuthenticateWithJWT(tokenAuthority, logger)(http.HandlerFunc(handler))
 	}
 
 	// -- Commented out routes are not implemented yet.
-	// They will be serving HTML pages in the future.
+	// -- They will be serving HTML pages in the future.
 	mux.Handle("GET /static/", fileServer)
-	mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {
-    	w.Header().Set("Content-Type", "application/json")
-    	http.ServeFile(w, r, "docs/openapi.json")
-	})
-
+	// Add OpenAPI JSON static serve route
+	mux.HandleFunc("GET /openapi.json", h.HandleGetOpenAPI)
 	// Add Swagger UI route
-mux.HandleFunc("GET /docs", func(w http.ResponseWriter, r *http.Request) {
-    html := `<!DOCTYPE html>
-	<html>
-		<head>
-    		<title>PlateOps API</title>
-    		<link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.22.0/swagger-ui.css" />
-		</head>
-		<body>
-    		<div id="swagger-ui"></div>
-    		<script src="https://unpkg.com/swagger-ui-dist@5.22.0/swagger-ui-bundle.js"></script>
-    		<script>
-        		SwaggerUIBundle({
-            		url: '/openapi.json',
-            		dom_id: '#swagger-ui',
-            		presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.presets.standalone]
-        		});
-    		</script>
-		</body>
-	</html>`
-    w.Header().Set("Content-Type", "text/html")
-    w.Write([]byte(html))
-})
-
-
+	mux.HandleFunc("GET /docs", h.HandleSwaggerUI)
 	mux.HandleFunc("GET /health", h.HandleGetHealth)
 	// -- mux.HandleFunc("GET /signup", h.HandleGetSignup)
 	mux.HandleFunc("POST /signup", h.HandlePostSignup)

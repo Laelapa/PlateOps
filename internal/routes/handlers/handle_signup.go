@@ -9,8 +9,8 @@ import (
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/Laelapa/PlateOps/util/validate"
-	"github.com/google/uuid"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -133,8 +133,8 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		UserAgent: r.UserAgent(),
 		IPAddress: net.GetFlyClientIP(r),
 	}
-	if err := rt.RegisterNewToken(h.queries, h.logger, rtParams); err != nil {
-		h.logger.LogAppError("Failed to register refresh token", err)
+	if regErr := rt.RegisterNewToken(h.queries, h.logger, rtParams); regErr != nil {
+		h.logger.LogAppError("Failed to register refresh token", regErr)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -164,13 +164,14 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(respMarshalled)
+	if _, err := w.Write(respMarshalled); err != nil {
+		h.logger.LogAppError("Failed to write response", err)
+	}
 
 	// TODO: Consider deescalating log level.
 	h.logger.LogRequestInfo("Signup request processed successfully", r)
 
 }
-
 
 func validateSignupRequest(rBody signupRequest) error {
 

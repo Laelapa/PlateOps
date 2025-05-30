@@ -9,6 +9,7 @@ import (
 	"github.com/Laelapa/PlateOps/util/auth"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/Laelapa/PlateOps/util/validate"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -43,8 +44,15 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the contents.
-	if err := validateRefreshRequest(rBody, h.tokenAuthority.GetRefreshTokenSizeInBytes()); err != nil {
-		h.logger.LogAppInfo("Invalid token refresh request", zap.Error(err), zap.String("request_user_id", rBody.UserID.String()))
+	if err := validateRefreshRequest(
+		rBody,
+		h.tokenAuthority.GetRefreshTokenSizeInBytes(),
+	); err != nil {
+		h.logger.LogAppInfo(
+			"Invalid token refresh request",
+			zap.Error(err),
+			zap.String("request_user_id", rBody.UserID.String()),
+		)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
@@ -97,7 +105,9 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(respMarshalled)
+	if _, err := w.Write(respMarshalled); err != nil {
+		h.logger.LogAppError("Failed to write response", err)
+	}
 
 	h.logger.LogRequestInfo("JWT refreshed successfully", r)
 

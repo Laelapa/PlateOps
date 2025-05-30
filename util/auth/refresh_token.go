@@ -8,9 +8,16 @@ import (
 
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
+
+// TODO: Possibly relocate DeepError to a more general package if it ends up being needed elsewhere.
+type DeepError struct {
+	BusinessErr  error
+	TechnicalErr error
+}
 
 var (
 	ErrTokenNotExist       = errors.New("token does not exist")
@@ -21,6 +28,18 @@ var (
 	ErrFingerprintMismatch = errors.New("token fingerprint mismatch")
 	ErrDatabaseFailure     = errors.New("database operation failed")
 )
+
+func (e *DeepError) Error() string {
+	return fmt.Sprintf("%v: %v", e.BusinessErr, e.TechnicalErr)
+}
+
+func (e *DeepError) Unwrap() error {
+	return e.TechnicalErr
+}
+
+func (e *DeepError) Is(target error) bool {
+	return errors.Is(e.BusinessErr, target) || errors.Is(e.TechnicalErr, target)
+}
 
 // VerifyRefreshToken checks if the refresh token is valid and matches the provided user & fingerprints.
 // If all checks pass, nil is returned, indicating the token is valid.
@@ -46,7 +65,10 @@ func VerifyRefreshToken(
 			return ErrTokenNotExist
 		}
 
-		return fmt.Errorf("%w: %v", ErrDatabaseFailure, err)
+		return &DeepError{
+			BusinessErr:  ErrDatabaseFailure,
+			TechnicalErr: err,
+		}
 	}
 
 	// Check for expiration.
