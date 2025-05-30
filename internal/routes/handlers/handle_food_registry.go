@@ -18,9 +18,9 @@ type requestCreateFood struct {
 	Category               string  `json:"category,omitempty"`
 	Description            string  `json:"description,omitempty"`
 	UnitType               string  `json:"unit_type"` // Type of unit, e.g., "grams", "liters", "items", "portions" etc.
-	Quantity               int     `json:"quantity"`
-	PortionCount           int     `json:"portion_count,omitempty"`                      // Number of portions in the food item
-	ExpirationAfterOpening int     `json:"expiration_after_opening,omitempty"` // in days
+	Quantity               int32   `json:"quantity"`
+	PortionCount           int32   `json:"portion_count,omitempty"`                      // Number of portions in the food item
+	ExpirationAfterOpening int32   `json:"expiration_after_opening,omitempty"` // in days
 	NutrientsPerItem       bool    `json:"nutrients_per_item,omitempty"`       // true: per item/portion, false: per 100g
 	Calories               float32 `json:"calories,omitempty"`
 	Fats                   float32 `json:"fats,omitempty"`
@@ -159,9 +159,7 @@ func validateCreateFoodRequest(req requestCreateFood) error {
 		}
 	}
 
-	if req.PortionCount == 0 {
-		req.PortionCount = 1
-	} else {
+	if req.PortionCount != 0 {
 		if err := validate.Positive(req.PortionCount); err != nil {
 			return err
 		}
@@ -196,15 +194,20 @@ func convertToCreateFoodEntryParams(
 	userID pgtype.UUID,
 ) (repository.CreateFoodEntryParams, error) {
 
+	pcount := req.PortionCount
+	if pcount == 0 {
+		pcount = 1 // Default to 1 if not specified
+	}
+
 	params := repository.CreateFoodEntryParams{
 		Name:                   req.Name,
 		Gtin:                   typeconvert.StringToPgtypeText(req.Gtin),
 		Category:               typeconvert.StringToPgtypeText(req.Category),
 		Description:            typeconvert.StringToPgtypeText(req.Description),
 		UnitType:               req.UnitType,
-		Quantity:               typeconvert.IntToPgtypeInt4(req.Quantity),
-		PortionCount:           typeconvert.IntToPgtypeInt4(req.PortionCount),
-		ExpirationAfterOpening: typeconvert.IntToPgtypeInt4(req.ExpirationAfterOpening),
+		Quantity:               typeconvert.Int32ToPgtypeInt4(req.Quantity),
+		PortionCount:           typeconvert.Int32ToPgtypeInt4(pcount),
+		ExpirationAfterOpening: typeconvert.Int32ToPgtypeInt4(req.ExpirationAfterOpening),
 		NutrientsPerItem:       typeconvert.BoolToPgtypeBool(req.NutrientsPerItem),
 		Calories:               typeconvert.Float32ToPgtypeFloat4(req.Calories),
 		Fats:                   req.Fats,
