@@ -45,10 +45,14 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the contents.
 	if err := validateRefreshRequest(
-		rBody, 
+		rBody,
 		h.tokenAuthority.GetRefreshTokenSizeInBytes(),
 	); err != nil {
-		h.logger.LogAppInfo("Invalid token refresh request", zap.Error(err), zap.String("request_user_id", rBody.UserID.String()))
+		h.logger.LogAppInfo(
+			"Invalid token refresh request",
+			zap.Error(err),
+			zap.String("request_user_id", rBody.UserID.String()),
+		)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}

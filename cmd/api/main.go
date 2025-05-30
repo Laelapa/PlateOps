@@ -24,10 +24,12 @@ import (
 )
 
 const (
-	defaultShutdownTimeout = 5 * time.Second    // Time until forceful shutdown
-	jwtLifetime            = 3 * time.Hour    // Lifetime of the JWT token // TODO: make configurable (possibly by environment: hours/days for dev | minutes for live)
-	rtLifetime             = 7 * 24 * time.Hour // (7 days) Lifetime of the refresh token
-	rtSizeInBytes          = 32
+	defaultShutdownTimeout = 5 * time.Second // Until forceful shutdown
+	jwtLifetime            = 3 * time.Hour   // Lifetime of the JWT token
+	// TODO: make jwtLifetime configurable (possibly by environment:
+	// hours/days for dev | minutes for live)
+	rtLifetime    = 7 * 24 * time.Hour // (7 days) Lifetime of the refresh token
+	rtSizeInBytes = 32
 )
 
 // main serves as the entry point for the application and acts as a thin wrapper
@@ -85,8 +87,8 @@ func run() error {
 	defer dbPool.Close()
 
 	// Verify database connection
-	if err := dbPool.Ping(ctx); err != nil {
-		return fmt.Errorf("database connection check failed: %w", err)
+	if dbPingErr := dbPool.Ping(ctx); dbPingErr != nil {
+		return fmt.Errorf("database connection check failed: %w", dbPingErr)
 	}
 
 	queries := repository.New(dbPool)
@@ -98,6 +100,9 @@ func run() error {
 		rtSizeInBytes,
 		rtLifetime,
 	)
+	if err != nil {
+		return fmt.Errorf("error creating token authority: %w", err)
+	}
 
 	// Parse the server shutdown timeout from the environment
 	shutdownTimeout, err := time.ParseDuration(os.Getenv("SERVER_SHUTDOWN_TIMEOUT") + "s")

@@ -21,7 +21,7 @@ func PgtypeInt4ToInt(i pgtype.Int4) int32 {
 	if !i.Valid {
 		return 0
 	}
-	return int32(i.Int32)
+	return i.Int32
 }
 
 func Float32ToPgtypeFloat4(f float32) pgtype.Float4 {

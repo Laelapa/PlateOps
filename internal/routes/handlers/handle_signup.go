@@ -133,8 +133,8 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 		UserAgent: r.UserAgent(),
 		IPAddress: net.GetFlyClientIP(r),
 	}
-	if err := rt.RegisterNewToken(h.queries, h.logger, rtParams); err != nil {
-		h.logger.LogAppError("Failed to register refresh token", err)
+	if regErr := rt.RegisterNewToken(h.queries, h.logger, rtParams); regErr != nil {
+		h.logger.LogAppError("Failed to register refresh token", regErr)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -172,7 +172,6 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	h.logger.LogRequestInfo("Signup request processed successfully", r)
 
 }
-
 
 func validateSignupRequest(rBody signupRequest) error {
 

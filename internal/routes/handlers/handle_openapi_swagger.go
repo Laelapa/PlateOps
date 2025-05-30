@@ -1,9 +1,11 @@
 package handlers
 
-import "net/http"
+import (
+	"net/http"
+)
 
-func (h *Handler)HandleSwaggerUI(w http.ResponseWriter, r *http.Request) {
-    html := `<!DOCTYPE html>
+func (h *Handler) HandleSwaggerUI(w http.ResponseWriter, r *http.Request) {
+	html := `<!DOCTYPE html>
 	<html>
 		<head>
     		<title>PlateOps API</title>
@@ -21,8 +23,15 @@ func (h *Handler)HandleSwaggerUI(w http.ResponseWriter, r *http.Request) {
     		</script>
 		</body>
 	</html>`
-    w.Header().Set("Content-Type", "text/html")
-	if _,err := w.Write([]byte(html)); err != nil {
+	w.Header().Set("Content-Type", "text/html")
+	if _, err := w.Write([]byte(html)); err != nil {
 		h.logger.LogAppError("Couldn't write response", err)
 	}
+	h.logger.LogRequestInfo("Served Swagger UI", r)
+}
+
+func (h *Handler) HandleGetOpenAPI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	http.ServeFile(w, r, "docs/openapi.json")
+	h.logger.LogRequestInfo("Served OpenAPI JSON", r)
 }

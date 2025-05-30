@@ -27,7 +27,13 @@ type TokenAuthority struct {
 // Returns:
 //   - *TokenAuthority: A pointer to the created TokenAuthority instance.
 //   - error: An error containing all the errors that occurred during validation, if any.
-func New(jwtSecret string, jwtIssuer string, jwtLifetime time.Duration, rtSizeInBytes int, rtLifetime time.Duration) (*TokenAuthority, error) {
+func New(
+	jwtSecret string,
+	jwtIssuer string,
+	jwtLifetime time.Duration,
+	rtSizeInBytes int,
+	rtLifetime time.Duration,
+) (*TokenAuthority, error) {
 
 	t := &TokenAuthority{
 		jwtSecret:     jwtSecret,

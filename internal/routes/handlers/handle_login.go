@@ -45,8 +45,8 @@ func (h *Handler) HandlePostLogin(w http.ResponseWriter, r *http.Request) {
 	// Validate the contents.
 	if err := validateLoginRequest(rBody); err != nil {
 		h.logger.LogAppInfo(
-			"Invalid login request contents", 
-			zap.Error(err), 
+			"Invalid login request contents",
+			zap.Error(err),
 			zap.String("request_username", rBody.Username),
 		)
 		http.Error(w, "Bad request", http.StatusBadRequest)
@@ -67,7 +67,7 @@ func (h *Handler) HandlePostLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Verify the password.
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(rBody.Password)); err != nil {
+	if bcryptErr := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(rBody.Password)); bcryptErr != nil {
 		h.logger.LogAppInfo("Invalid password", zap.String("request_username", rBody.Username))
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -98,8 +98,8 @@ func (h *Handler) HandlePostLogin(w http.ResponseWriter, r *http.Request) {
 		UserAgent: r.UserAgent(),
 		IPAddress: net.GetFlyClientIP(r),
 	}
-	if err := rt.RegisterNewToken(h.queries, h.logger, rtParams); err != nil {
-		h.logger.LogAppError("Failed to register refresh token", err)
+	if regErr := rt.RegisterNewToken(h.queries, h.logger, rtParams); regErr != nil {
+		h.logger.LogAppError("Failed to register refresh token", regErr)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}

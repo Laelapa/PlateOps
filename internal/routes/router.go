@@ -17,9 +17,9 @@ import (
 // Parameters:
 //   - staticDir: The directory containing static files to serve
 func Setup(
-	staticDir string, 
-	logger *logging.Logger, 
-	queries *repository.Queries, 
+	staticDir string,
+	logger *logging.Logger,
+	queries *repository.Queries,
 	tokenAuthority *tokenauthority.TokenAuthority,
 ) *http.ServeMux {
 
@@ -36,10 +36,8 @@ func Setup(
 	// -- Commented out routes are not implemented yet.
 	// -- They will be serving HTML pages in the future.
 	mux.Handle("GET /static/", fileServer)
-	mux.HandleFunc("GET /openapi.json", func(w http.ResponseWriter, r *http.Request) {
-    	w.Header().Set("Content-Type", "application/json")
-    	http.ServeFile(w, r, "docs/openapi.json")
-	})
+	// Add OpenAPI JSON static serve route
+	mux.HandleFunc("GET /openapi.json", h.HandleGetOpenAPI)
 	// Add Swagger UI route
 	mux.HandleFunc("GET /docs", h.HandleSwaggerUI)
 	mux.HandleFunc("GET /health", h.HandleGetHealth)

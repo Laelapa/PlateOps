@@ -84,9 +84,10 @@ func New(
 
 // newMux creates and configures the HTTP request multiplexer with all routes
 // and middleware attached.
-func newMux(staticDir string, 
-	logger *logging.Logger, 
-	queries *repository.Queries, 
+func newMux(
+	staticDir string,
+	logger *logging.Logger,
+	queries *repository.Queries,
 	tokenAuthority *tokenauthority.TokenAuthority,
 ) http.Handler {
 

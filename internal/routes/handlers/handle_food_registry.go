@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/util/ctxutils"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
 	"github.com/Laelapa/PlateOps/util/validate"
 
@@ -19,7 +20,7 @@ type requestCreateFood struct {
 	Description            string  `json:"description,omitempty"`
 	UnitType               string  `json:"unit_type"` // Type of unit, e.g., "grams", "liters", "items", "portions" etc.
 	Quantity               int32   `json:"quantity"`
-	PortionCount           int32   `json:"portion_count,omitempty"`                      // Number of portions in the food item
+	PortionCount           int32   `json:"portion_count,omitempty"`            // Number of portions in the food item
 	ExpirationAfterOpening int32   `json:"expiration_after_opening,omitempty"` // in days
 	NutrientsPerItem       bool    `json:"nutrients_per_item,omitempty"`       // true: per item/portion, false: per 100g
 	Calories               float32 `json:"calories,omitempty"`
@@ -45,7 +46,7 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 
 	// Extract user ID from context - this should be set by the authentication middleware
 	// TODO: Consider edge cases, check if they are accounted for in the middleware
-	userID, ok := ctx.Value("userID").(pgtype.UUID)
+	userID, ok := ctxutils.GetUserIDFromContext(ctx)
 	if !ok {
 		h.logger.LogRequestWarn("Invalid or missing user ID in context", r)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -82,20 +83,15 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate request fields
-	if err := validateCreateFoodRequest(rBody); err != nil {
+	if valErr := validateCreateFoodRequest(rBody); valErr != nil {
 		h.logger.LogRequestWarn("Invalid request body", r)
-		h.logger.LogAppWarn("Invalid request body", zap.Error(err))
-		http.Error(w, "Bad request: "+err.Error(), http.StatusBadRequest)
+		h.logger.LogAppWarn("Invalid request body", zap.Error(valErr))
+		http.Error(w, "Bad request: "+valErr.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Convert request fields to database parameters
-	dbParams, err := convertToCreateFoodEntryParams(rBody, userID)
-	if err != nil {
-		h.logger.LogAppError("Error converting request to database params", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+	dbParams := convertToCreateFoodEntryParams(rBody, userID)
 
 	// Register the food entry with the database
 	foodEntry, err := h.queries.CreateFoodEntry(ctx, dbParams)
@@ -190,9 +186,9 @@ func validateCreateFoodRequest(req requestCreateFood) error {
 }
 
 func convertToCreateFoodEntryParams(
-	req requestCreateFood, 
+	req requestCreateFood,
 	userID pgtype.UUID,
-) (repository.CreateFoodEntryParams, error) {
+) repository.CreateFoodEntryParams {
 
 	pcount := req.PortionCount
 	if pcount == 0 {
@@ -220,6 +216,5 @@ func convertToCreateFoodEntryParams(
 		CreatedBy:              userID,
 	}
 
-
-	return params, nil
+	return params
 }

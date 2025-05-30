@@ -60,7 +60,7 @@ func (h *Handler) HandlePostLogout(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if _,err := w.Write(respMarshalled); err != nil {
+	if _, err := w.Write(respMarshalled); err != nil {
 		h.logger.LogAppError("Couldn't write response", err)
 	}
 
