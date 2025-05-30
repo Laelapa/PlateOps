@@ -16,7 +16,12 @@ import (
 //
 // Parameters:
 //   - staticDir: The directory containing static files to serve
-func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries, tokenAuthority *tokenauthority.TokenAuthority) *http.ServeMux {
+func Setup(
+	staticDir string, 
+	logger *logging.Logger, 
+	queries *repository.Queries, 
+	tokenAuthority *tokenauthority.TokenAuthority,
+) *http.ServeMux {
 
 	mux := http.NewServeMux()
 	fileServer := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
@@ -24,7 +29,7 @@ func Setup(staticDir string, logger *logging.Logger, queries *repository.Queries
 	h := handlers.New(logger, queries, tokenAuthority)
 
 	// to simplify the mux.Handle parameters for authenticated routes
-	withAuth := func (handler func(http.ResponseWriter, *http.Request)) http.Handler {
+	withAuth := func(handler func(http.ResponseWriter, *http.Request)) http.Handler {
 		return middleware.AuthenticateWithJWT(tokenAuthority, logger)(http.HandlerFunc(handler))
 	}
 

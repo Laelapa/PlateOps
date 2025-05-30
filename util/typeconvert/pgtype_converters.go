@@ -35,7 +35,6 @@ func PgtypeFloat4ToFloat32(pf pgtype.Float4) float32 {
 	return pf.Float32
 }
 
-
 func BoolToPgtypeBool(b bool) pgtype.Bool {
 	return pgtype.Bool{Bool: b, Valid: true}
 }

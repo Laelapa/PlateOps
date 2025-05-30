@@ -10,11 +10,8 @@ import (
 // If the Google UUID is nil, it sets the Valid field to false.
 func GoogleUUIDToPgtypeUUID(gUUID uuid.UUID) pgtype.UUID {
 	if gUUID == uuid.Nil {
-		return pgtype.UUID{
-			Valid: false,
-		}		
+		return pgtype.UUID{Valid: false}		
 	}
-
 	return pgtype.UUID{
 		Bytes: gUUID,
 		Valid: true,

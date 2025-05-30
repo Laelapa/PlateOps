@@ -8,6 +8,7 @@ import (
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/Laelapa/PlateOps/util/validate"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
@@ -43,7 +44,11 @@ func (h *Handler) HandlePostLogin(w http.ResponseWriter, r *http.Request) {
 
 	// Validate the contents.
 	if err := validateLoginRequest(rBody); err != nil {
-		h.logger.LogAppInfo("Invalid login request contents", zap.Error(err), zap.String("request_username", rBody.Username))
+		h.logger.LogAppInfo(
+			"Invalid login request contents", 
+			zap.Error(err), 
+			zap.String("request_username", rBody.Username),
+		)
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}

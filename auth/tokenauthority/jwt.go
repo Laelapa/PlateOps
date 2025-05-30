@@ -29,14 +29,17 @@ func (t *TokenAuthority) IssueJWT(userID uuid.UUID) (signedToken string, err err
 
 func (t *TokenAuthority) ValidateJWT(tokenString string) (subject string, err error) {
 
-	token, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
-
-		if token.Method != jwt.SigningMethodHS256 {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(t.jwtSecret), nil
-	})
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&jwt.RegisteredClaims{}, 
+		func(token *jwt.Token) (interface{}, error) {
+			if token.Method != jwt.SigningMethodHS256 {
+				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+			}
+			return []byte(t.jwtSecret), nil
+		},
+	)
+	
 	if err != nil {
 		return "", errors.New("failed to parse JWT" + err.Error())
 	}

@@ -14,10 +14,10 @@ import (
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/app"
 	"github.com/Laelapa/PlateOps/internal/repository"
-	"github.com/joho/godotenv"
 
 	"github.com/Laelapa/GoHome/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 
 	_ "github.com/jackc/pgx/v5"

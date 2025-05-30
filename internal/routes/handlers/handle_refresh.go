@@ -9,6 +9,7 @@ import (
 	"github.com/Laelapa/PlateOps/util/auth"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/Laelapa/PlateOps/util/validate"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -43,7 +44,10 @@ func (h *Handler) HandlePostRefresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the contents.
-	if err := validateRefreshRequest(rBody, h.tokenAuthority.GetRefreshTokenSizeInBytes()); err != nil {
+	if err := validateRefreshRequest(
+		rBody, 
+		h.tokenAuthority.GetRefreshTokenSizeInBytes(),
+	); err != nil {
 		h.logger.LogAppInfo("Invalid token refresh request", zap.Error(err), zap.String("request_user_id", rBody.UserID.String()))
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return

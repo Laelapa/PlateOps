@@ -7,6 +7,7 @@ import (
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
 	"github.com/Laelapa/PlateOps/util/validate"
+
 	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 )
@@ -190,7 +191,10 @@ func validateCreateFoodRequest(req requestCreateFood) error {
 	return nil
 }
 
-func convertToCreateFoodEntryParams(req requestCreateFood, userID pgtype.UUID) (repository.CreateFoodEntryParams, error) {
+func convertToCreateFoodEntryParams(
+	req requestCreateFood, 
+	userID pgtype.UUID,
+) (repository.CreateFoodEntryParams, error) {
 
 	params := repository.CreateFoodEntryParams{
 		Name:                   req.Name,

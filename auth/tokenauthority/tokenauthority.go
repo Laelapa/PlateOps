@@ -48,7 +48,8 @@ func (t *TokenAuthority) validateConfig() error {
 	var errs []error
 
 	if len(t.jwtSecret) < 16 {
-		errs = append(errs, errors.New("jwtSecret must be at least 16 characters long, ideally >= 32"))
+		errstr := "jwtSecret must be at least 16 characters long, ideally >= 32"
+		errs = append(errs, errors.New(errstr))
 	}
 	if t.jwtLifetime <= 0 {
 		errs = append(errs, errors.New("jwtLifetime must be a positive value"))

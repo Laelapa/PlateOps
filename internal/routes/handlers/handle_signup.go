@@ -9,8 +9,8 @@ import (
 	"github.com/Laelapa/PlateOps/internal/services/auth/rt"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/Laelapa/PlateOps/util/validate"
-	"github.com/google/uuid"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
