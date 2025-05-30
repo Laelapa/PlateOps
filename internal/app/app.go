@@ -141,7 +141,7 @@ func (app *App) LaunchServer() error {
 	select {
 	case err := <-errChan:
 
-		return fmt.Errorf("server failed to start: %v", err)
+		return fmt.Errorf("server failed to start: %w", err)
 
 	case <-app.ctx.Done():
 

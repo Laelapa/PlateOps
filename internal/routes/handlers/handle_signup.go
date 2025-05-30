@@ -164,7 +164,9 @@ func (h *Handler) HandlePostSignup(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(respMarshalled)
+	if _, err := w.Write(respMarshalled); err != nil {
+		h.logger.LogAppError("Failed to write response", err)
+	}
 
 	// TODO: Consider deescalating log level.
 	h.logger.LogRequestInfo("Signup request processed successfully", r)

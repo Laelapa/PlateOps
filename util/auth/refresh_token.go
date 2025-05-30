@@ -22,6 +22,24 @@ var (
 	ErrDatabaseFailure     = errors.New("database operation failed")
 )
 
+// TODO: Possibly relocate DeepError to a more general package if it ends up being needed elsewhere.
+type DeepError struct{
+	BusinessErr error
+	TechnicalErr error
+}
+
+func (e *DeepError) Error() string {
+	return fmt.Sprintf("%v: %v", e.BusinessErr, e.TechnicalErr)
+}
+
+func (e *DeepError) Unwrap() error {
+	return e.TechnicalErr
+}
+
+func (e *DeepError) Is(target error) bool {
+	return errors.Is(e.BusinessErr, target) || errors.Is(e.TechnicalErr, target)
+}	
+
 // VerifyRefreshToken checks if the refresh token is valid and matches the provided user & fingerprints.
 // If all checks pass, nil is returned, indicating the token is valid.
 // If any of these checks fail, an appropriate error is returned.
@@ -46,7 +64,10 @@ func VerifyRefreshToken(
 			return ErrTokenNotExist
 		}
 
-		return fmt.Errorf("%w: %v", ErrDatabaseFailure, err)
+		return &DeepError{
+			BusinessErr: ErrDatabaseFailure,
+			TechnicalErr: err,
+		}
 	}
 
 	// Check for expiration.
