@@ -84,16 +84,21 @@ func New(
 
 // newMux creates and configures the HTTP request multiplexer with all routes
 // and middleware attached.
-func newMux(staticDir string, logger *logging.Logger, queries *repository.Queries, tokenAuthority *tokenauthority.TokenAuthority) http.Handler {
+func newMux(
+	staticDir string,
+	logger *logging.Logger,
+	queries *repository.Queries,
+	tokenAuthority *tokenauthority.TokenAuthority,
+) http.Handler {
 
 	mux := routes.Setup(staticDir, logger, queries, tokenAuthority)
 
-	return attachBasicMiddleware(mux, logger, tokenAuthority)
+	return attachBasicMiddleware(mux, logger)
 }
 
 // attachBasicMiddleware wraps the provided handler with common middleware
 // functions used across all routes.
-func attachBasicMiddleware(handler http.Handler, logger *logging.Logger, tokenAuthority *tokenauthority.TokenAuthority) http.Handler {
+func attachBasicMiddleware(handler http.Handler, logger *logging.Logger) http.Handler {
 
 	handler = middleware.SecurityResponseHeaders(handler)
 	handler = middleware.CacheControlHeader(handler)
@@ -141,7 +146,7 @@ func (app *App) LaunchServer() error {
 	select {
 	case err := <-errChan:
 
-		return fmt.Errorf("server failed to start: %v", err)
+		return fmt.Errorf("server failed to start: %w", err)
 
 	case <-app.ctx.Done():
 

@@ -40,5 +40,5 @@ func StripBearer(authHeader string) (string, error) {
 		return authHeader[7:], nil
 	}
 
-	return "", errors.New("Invalid authorization header format")
+	return "", errors.New("invalid authorization header format")
 }
