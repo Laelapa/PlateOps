@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
@@ -9,17 +10,18 @@ import (
 	"github.com/Laelapa/PlateOps/util/typeconvert"
 	"github.com/Laelapa/PlateOps/util/validate"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
 )
 
-type requestCreateFood struct {
-	Name                   string  `json:"name"`
+type requestFood struct {
+	Name                   string  `json:"name,omitempty"`
 	Gtin                   string  `json:"gtin,omitempty"`
 	Category               string  `json:"category,omitempty"`
 	Description            string  `json:"description,omitempty"`
-	UnitType               string  `json:"unit_type"` // Type of unit, e.g., "grams", "liters", "items", "portions" etc.
-	Quantity               int32   `json:"quantity"`
+	UnitType               string  `json:"unit_type,omitempty"` // Type of unit, e.g., "grams", "liters", "items", "portions" etc.
+	Quantity               int32   `json:"quantity,omitempty"`
 	PortionCount           int32   `json:"portion_count,omitempty"`            // Number of portions in the food item
 	ExpirationAfterOpening int32   `json:"expiration_after_opening,omitempty"` // in days
 	NutrientsPerItem       bool    `json:"nutrients_per_item,omitempty"`       // true: per item/portion, false: per 100g
@@ -33,7 +35,7 @@ type requestCreateFood struct {
 	Sodium                 float32 `json:"sodium,omitempty"`
 }
 
-type responseCreateFood struct {
+type responseFood struct {
 	Success   bool   `json:"success"`
 	Message   string `json:"message,omitempty"`
 	ProductID int32  `json:"product_id,omitempty"`
@@ -41,7 +43,7 @@ type responseCreateFood struct {
 
 func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 
-	var rBody requestCreateFood
+	var rBody requestFood
 	ctx := r.Context()
 
 	// Extract user ID from context - this should be set by the authentication middleware
@@ -69,6 +71,7 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// FIXME: Duplicate names not a problem, check for GTIN uniqueness instead
 	// Check if `Name` is already used
 	existingFood, err := h.queries.GetFoodEntriesByName(ctx, rBody.Name)
 	if err != nil {
@@ -102,7 +105,7 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create success response
-	resp := responseCreateFood{
+	resp := responseFood{
 		Success:   true,
 		Message:   "Food entry created successfully",
 		ProductID: foodEntry.ProductID,
@@ -122,7 +125,57 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-func validateCreateFoodRequest(req requestCreateFood) error {
+func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
+
+	var rBody requestFood
+	ctx := r.Context()
+
+	// TODO: Consider edge cases, check if they are accounted for in the middleware
+	userID, ok := ctxutils.GetUserIDFromContext(ctx)
+	if !ok {
+		h.logger.LogRequestWarn("Invalid or missing user ID in context", r)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	h.logger.LogRequestInfo("Updating food entry in the registry", r)
+
+	productID := r.PathValue("id")
+	if productID == "" {
+		h.logger.LogRequestWarn("Missing product id from request", r)
+		http.Error(w, "Bad request: missing product id", http.StatusBadRequest)
+		return
+	}
+
+	existingFood, err := h.queries.GetFoodEntryById(ctx, productID)
+
+	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
+		h.logger.LogRequestWarn("Couldn't decode request body", r)
+		h.logger.LogAppWarn("Couldn't decode request body", zap.Error(err))
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+
+
+	if rBody.Gtin != "" {
+		existingGtin, err := h.queries.GetFoodEntryByGtin(ctx, typeconvert.StringToPgtypeText(rBody.Gtin))
+		if err != nil {
+			if !errors.Is(err, pgx.ErrNoRows) {
+				h.logger.LogAppError("Failed to check existing food entries", err)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		} else if existingGtin.ProductID != productID {
+			h.logger.LogRequestWarn("Food with the same name already exists", r)
+			http.Error(w, "Food with the same name already exists", http.StatusConflict)
+			return
+		}
+	}
+
+}
+
+func validateCreateFoodRequest(req requestFood) error {
 	if err := validate.StringRequired(req.Name); err != nil {
 		return err
 	}
@@ -186,7 +239,7 @@ func validateCreateFoodRequest(req requestCreateFood) error {
 }
 
 func convertToCreateFoodEntryParams(
-	req requestCreateFood,
+	req requestFood,
 	userID pgtype.UUID,
 ) repository.CreateFoodEntryParams {
 
