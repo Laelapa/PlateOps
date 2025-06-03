@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"github.com/Laelapa/GoHome/logging"
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/repository"
+
+	"github.com/Laelapa/GoHome/logging"
 )
 
 type Handler struct {

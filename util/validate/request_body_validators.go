@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/Laelapa/PlateOps/util/validate/regex"
+
 	guuid "github.com/google/uuid"
 )
 
@@ -128,10 +129,10 @@ func UnitType(t string) error {
 	}
 
 	m := map[string]bool{
-		"grams":	true,
-		"ml":		true,
-		"items":	true,
-		"portions":	true,
+		"grams":    true,
+		"ml":       true,
+		"items":    true,
+		"portions": true,
 	}
 
 	if !m[t] {
