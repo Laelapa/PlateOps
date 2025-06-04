@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/util"
 	"github.com/Laelapa/PlateOps/util/ctxutils"
+	"github.com/Laelapa/PlateOps/util/parse"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
 	"github.com/Laelapa/PlateOps/util/validate"
 
@@ -15,6 +18,12 @@ import (
 	"go.uber.org/zap"
 )
 
+var ErrGtinAlreadyExists = errors.New("GTIN already exists for another food entry")
+var ErrQueryFailed = errors.New("failed to execute database query")
+
+// requestFood represents the structure of the request body for creating or updating a food entry.
+// All fields are set to be optional to accommodate the PATCH method.
+// For fields that are necessary for other methods verify the request body in the handler.
 type requestFood struct {
 	Name                   string  `json:"name,omitempty"`
 	Gtin                   string  `json:"gtin,omitempty"`
@@ -64,29 +73,20 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Validate required fields
-	if rBody.Name == "" || rBody.UnitType == "" || rBody.Quantity <= 0 {
+	// Verify that the required fields are present.
+	if rBody.Name == "" || rBody.UnitType == "" || rBody.Quantity == 0 {
 		h.logger.LogRequestWarn("Invalid request body: missing required fields", r)
 		http.Error(w, "Bad request: missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	// FIXME: Duplicate names not a problem, check for GTIN uniqueness instead
-	// Check if `Name` is already used
-	existingFood, err := h.queries.GetFoodEntriesByName(ctx, rBody.Name)
-	if err != nil {
-		h.logger.LogAppError("Failed to check existing food entries", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-	if len(existingFood) > 0 {
-		h.logger.LogRequestWarn("Food with the same name already exists", r)
-		http.Error(w, "Food with the same name already exists", http.StatusConflict)
-		return
-	}
-
 	// Validate request fields
-	if valErr := validateCreateFoodRequest(rBody); valErr != nil {
+	if valErr := h.validateFoodRequestParams(ctx, rBody); valErr != nil {
+		if errors.Is(valErr, ErrQueryFailed) {
+			h.logger.LogAppError("Failed to validate request parameters", valErr)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 		h.logger.LogRequestWarn("Invalid request body", r)
 		h.logger.LogAppWarn("Invalid request body", zap.Error(valErr))
 		http.Error(w, "Bad request: "+valErr.Error(), http.StatusBadRequest)
@@ -140,14 +140,24 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 
 	h.logger.LogRequestInfo("Updating food entry in the registry", r)
 
-	productID := r.PathValue("id")
-	if productID == "" {
-		h.logger.LogRequestWarn("Missing product id from request", r)
-		http.Error(w, "Bad request: missing product id", http.StatusBadRequest)
+	productID, err := parse.ID(r.PathValue("id"))
+	if err != nil {
+		h.logger.LogRequestWarn("Invalid product ID", r)
+		h.logger.LogAppWarn("Invalid product ID", zap.Error(err))
+		http.Error(w, "Bad request: invalid product ID", http.StatusBadRequest)
 		return
 	}
 
-	existingFood, err := h.queries.GetFoodEntryById(ctx, productID)
+	if err := h.checkGtinUniqueness(ctx, rBody.Gtin, productID); err != nil {
+		if errors.Is(err, ErrGtinAlreadyExists) {
+			h.logger.LogRequestWarn("GTIN already exists for another food entry", r)
+			http.Error(w, "GTIN already exists", http.StatusConflict)
+			return
+		}
+		h.logger.LogAppError("Failed to check GTIN uniqueness", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 
 	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
 		h.logger.LogRequestWarn("Couldn't decode request body", r)
@@ -156,38 +166,54 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO: Consider locking editing to owner of the food entry
+	// `if existingFood.CreatedBy != userID`
 
-
-	if rBody.Gtin != "" {
-		existingGtin, err := h.queries.GetFoodEntryByGtin(ctx, typeconvert.StringToPgtypeText(rBody.Gtin))
-		if err != nil {
-			if !errors.Is(err, pgx.ErrNoRows) {
-				h.logger.LogAppError("Failed to check existing food entries", err)
-				http.Error(w, "Internal server error", http.StatusInternalServerError)
-				return
-			}
-		} else if existingGtin.ProductID != productID {
-			h.logger.LogRequestWarn("Food with the same name already exists", r)
-			http.Error(w, "Food with the same name already exists", http.StatusConflict)
+	// Validate request fields
+	if valErr := h.validateFoodRequestParams(ctx, rBody); valErr != nil {
+		if errors.Is(valErr, ErrQueryFailed) {
+			h.logger.LogAppError("Failed to validate request parameters", valErr)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
+		h.logger.LogRequestWarn("Invalid request body", r)
+		h.logger.LogAppWarn("Invalid request body", zap.Error(valErr))
+		http.Error(w, "Bad request: "+valErr.Error(), http.StatusBadRequest)
+		return
 	}
 
 }
 
-func validateCreateFoodRequest(req requestFood) error {
-	if err := validate.StringRequired(req.Name); err != nil {
-		return err
-	}
+// If a field is present, it checks its validity according to the business rules.
+// Returns an error if any validation fails, or nil if all validations pass.
+// This function does NOT verify the presence of required fields.
+// It is expected that the handler will check for required fields before calling this function.
+// 
+// Parameters:
+//   - ctx: The context for the request, used for database operations
+//   - req: The request body containing the food entry data
+//
+// Returns:
+//   - error: Returns nil if all validations pass, or an error if any validation fails.
+//
+// Possible errors:
+//   - ErrQueryFailed: if there is an internal failure while executing the database query
+//   - Propagated validation errors: if any of the fields fail validation checks
+func (h *Handler) validateFoodRequestParams(ctx context.Context, req requestFood) error {
 
 	if req.Gtin != "" { // if not omitted
 		if err := validate.GTIN(req.Gtin); err != nil {
 			return err
 		}
+		if err := h.checkGtinUniqueness(ctx, req.Gtin, -1); err != nil {
+			return err
+		}
 	}
 
-	if err := validate.UnitType(req.UnitType); err != nil {
-		return err
+	if req.UnitType != "" {
+		if err := validate.UnitType(req.UnitType); err != nil {
+			return err
+		}
 	}
 
 	if req.Category != "" {
@@ -270,4 +296,25 @@ func convertToCreateFoodEntryParams(
 	}
 
 	return params
+}
+
+func (h *Handler) checkGtinUniqueness(ctx context.Context, gtin string, productID int32) error {
+
+	// Check if GTIN is already used by another food entry
+	existingFood, err := h.queries.GetFoodEntryByGtin(
+		ctx,
+		typeconvert.StringToPgtypeText(gtin),
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil // GTIN is unique
+		}
+		return (&util.DeepError{BusinessErr: ErrQueryFailed, TechnicalErr: err})
+	}
+
+	if existingFood.ProductID != productID {
+		return ErrGtinAlreadyExists
+	}
+
+	return nil // GTIN matches the current food entry
 }

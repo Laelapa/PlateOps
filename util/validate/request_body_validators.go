@@ -109,6 +109,7 @@ func GTIN(gtin string) error {
 		return ErrGtinTooLong
 	}
 
+	// FIXME: only numeric
 	// GTIN can be numeric or alphanumeric, but must not contain special characters.
 	// Also, for consistency capitalization is enforced.
 	if !regex.AlphanumericCapitalized.MatchString(gtin) {
