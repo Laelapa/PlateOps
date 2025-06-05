@@ -162,7 +162,7 @@ FROM inventory_item_with_info
 WHERE name = $1
 `
 
-func (q *Queries) GetInventoryItemsByName(ctx context.Context, name string) ([]InventoryItemWithInfo, error) {
+func (q *Queries) GetInventoryItemsByName(ctx context.Context, name pgtype.Text) ([]InventoryItemWithInfo, error) {
 	rows, err := q.db.Query(ctx, getInventoryItemsByName, name)
 	if err != nil {
 		return nil, err
