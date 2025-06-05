@@ -11,7 +11,6 @@ import (
 	"github.com/Laelapa/PlateOps/util/ctxutils"
 	"github.com/Laelapa/PlateOps/util/parse"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
-	"github.com/Laelapa/PlateOps/util/validate"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -163,6 +162,8 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	dbParams := convertToUpdateFoodEntryParams(rBody, userID, productID)
 }
 
 func convertToCreateFoodEntryParams(
@@ -170,30 +171,56 @@ func convertToCreateFoodEntryParams(
 	userID pgtype.UUID,
 ) repository.CreateFoodEntryParams {
 
-	pcount := req.PortionCount
-	if pcount == 0 {
-		pcount = 1 // Default to 1 if not specified
+	params := repository.CreateFoodEntryParams{
+		Name:                   typeconvert.PtrStringToPgtypeText(req.Name),
+		Gtin:                   typeconvert.PtrStringToPgtypeText(req.Gtin),
+		Category:               typeconvert.PtrStringToPgtypeText(req.Category),
+		Description:            typeconvert.PtrStringToPgtypeText(req.Description),
+		UnitType:               typeconvert.PtrStringToPgtypeText(req.UnitType),
+		Quantity:               typeconvert.PtrInt32ToPgtypeInt4(req.Quantity),
+		PortionCount:           typeconvert.PtrInt32ToPgtypeInt4(req.PortionCount),
+		ExpirationAfterOpening: typeconvert.PtrInt32ToPgtypeInt4(req.ExpirationAfterOpening),
+		NutrientsPerItem:       typeconvert.PtrBoolToPgtypeBool(req.NutrientsPerItem),
+		Calories:               typeconvert.PtrFloat32ToPgtypeFloat4(req.Calories),
+		Fats:                   typeconvert.PtrFloat32ToPgtypeFloat4(req.Fats),
+		Saturated:              typeconvert.PtrFloat32ToPgtypeFloat4(req.Saturated),
+		Carbs:                  typeconvert.PtrFloat32ToPgtypeFloat4(req.Carbs),
+		Sugars:                 typeconvert.PtrFloat32ToPgtypeFloat4(req.Sugars),
+		Protein:                typeconvert.PtrFloat32ToPgtypeFloat4(req.Protein),
+		Fiber:                  typeconvert.PtrFloat32ToPgtypeFloat4(req.Fiber),
+		Sodium:                 typeconvert.PtrFloat32ToPgtypeFloat4(req.Sodium),
+		CreatedBy:              userID,
 	}
 
-	params := repository.CreateFoodEntryParams{
-		Name:                   req.Name,
-		Gtin:                   typeconvert.StringToPgtypeText(req.Gtin),
-		Category:               typeconvert.StringToPgtypeText(req.Category),
-		Description:            typeconvert.StringToPgtypeText(req.Description),
-		UnitType:               req.UnitType,
-		Quantity:               typeconvert.Int32ToPgtypeInt4(req.Quantity),
-		PortionCount:           typeconvert.Int32ToPgtypeInt4(pcount),
-		ExpirationAfterOpening: typeconvert.Int32ToPgtypeInt4(req.ExpirationAfterOpening),
-		NutrientsPerItem:       typeconvert.BoolToPgtypeBool(req.NutrientsPerItem),
-		Calories:               typeconvert.Float32ToPgtypeFloat4(req.Calories),
-		Fats:                   req.Fats,
-		Saturated:              req.Saturated,
-		Carbs:                  req.Carbs,
-		Sugars:                 req.Sugars,
-		Protein:                req.Protein,
-		Fiber:                  req.Fiber,
-		Sodium:                 req.Sodium,
-		CreatedBy:              userID,
+	return params
+}
+
+func convertToUpdateFoodEntryParams(
+	req requestFood,
+	userID pgtype.UUID,
+	productID int32,
+) repository.UpdateFoodEntryParams {
+
+	params := repository.UpdateFoodEntryParams{
+		Name:                   typeconvert.PtrStringToPgtypeText(req.Name),
+		Gtin:                   typeconvert.PtrStringToPgtypeText(req.Gtin),
+		Category:               typeconvert.PtrStringToPgtypeText(req.Category),
+		Description:            typeconvert.PtrStringToPgtypeText(req.Description),
+		UnitType:               typeconvert.PtrStringToPgtypeText(req.UnitType),
+		Quantity:               typeconvert.PtrInt32ToPgtypeInt4(req.Quantity),
+		PortionCount:           typeconvert.PtrInt32ToPgtypeInt4(req.PortionCount),
+		ExpirationAfterOpening: typeconvert.PtrInt32ToPgtypeInt4(req.ExpirationAfterOpening),
+		NutrientsPerItem:       typeconvert.PtrBoolToPgtypeBool(req.NutrientsPerItem),
+		Calories:               typeconvert.PtrFloat32ToPgtypeFloat4(req.Calories),
+		Fats:                   typeconvert.PtrFloat32ToPgtypeFloat4(req.Fats),
+		Saturated:              typeconvert.PtrFloat32ToPgtypeFloat4(req.Saturated),
+		Carbs:                  typeconvert.PtrFloat32ToPgtypeFloat4(req.Carbs),
+		Sugars:                 typeconvert.PtrFloat32ToPgtypeFloat4(req.Sugars),
+		Protein:                typeconvert.PtrFloat32ToPgtypeFloat4(req.Protein),
+		Fiber:                  typeconvert.PtrFloat32ToPgtypeFloat4(req.Fiber),
+		Sodium:                 typeconvert.PtrFloat32ToPgtypeFloat4(req.Sodium),
+		ProductID:              productID,
+		UpdatedBy:              userID,
 	}
 
 	return params
