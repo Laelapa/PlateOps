@@ -84,7 +84,7 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if rBody.Gtin != nil { // if not omitted
-		if err := h.checkGtinUniqueness(ctx, *rBody.Gtin, -1); err != nil {
+		if err := h.checkGtinUniqueness(ctx, rBody.Gtin, -1); err != nil {
 			h.HandleError(w, r, err, "GTIN already exists", http.StatusConflict)
 			return
 		}
@@ -157,13 +157,43 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 	// `if existingFood.CreatedBy != userID`
 
 	if rBody.Gtin != nil { // if not omitted
-		if err := h.checkGtinUniqueness(ctx, *rBody.Gtin, -1); err != nil {
+		if err := h.checkGtinUniqueness(ctx, rBody.Gtin, -1); err != nil {
 			h.HandleError(w, r, err, "GTIN already exists", http.StatusConflict)
 			return
 		}
 	}
 
+	// Convert request fields to database parameters
 	dbParams := convertToUpdateFoodEntryParams(rBody, userID, productID)
+
+	dbErr := h.queries.UpdateFoodEntry(ctx, dbParams)
+	if dbErr != nil {
+		if errors.Is(dbErr, pgx.ErrNoRows) {
+			h.HandleError(w, r, dbErr, "Food entry not found", http.StatusNotFound)
+			return
+		}
+		h.HandleError(w, r, dbErr, "db error", http.StatusInternalServerError)
+		return
+	}
+
+	resp := responseFood{
+		Success:   true,
+		Message:   "Food entry updated successfully",
+		ProductID: productID,
+	}
+
+	// Send response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		h.logger.LogAppError("Failed to encode response", err)
+	}
+
+	h.logger.LogAppInfo(
+		"Food entry updated successfully",
+		zap.Int32("product_id", productID),
+		zap.String("user_id", typeconvert.PgtypeUUIDToString(userID)),
+	)
 }
 
 func convertToCreateFoodEntryParams(
@@ -226,12 +256,12 @@ func convertToUpdateFoodEntryParams(
 	return params
 }
 
-func (h *Handler) checkGtinUniqueness(ctx context.Context, gtin string, productID int32) error {
+func (h *Handler) checkGtinUniqueness(ctx context.Context, gtin *string, productID int32) error {
 
 	// Check if GTIN is already used by another food entry
 	existingFood, err := h.queries.GetFoodEntryByGtin(
 		ctx,
-		typeconvert.StringToPgtypeText(gtin),
+		typeconvert.PtrStringToPgtypeText(gtin),
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
