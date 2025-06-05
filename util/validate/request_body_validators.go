@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/Laelapa/PlateOps/util/validate/regex"
+
 	guuid "github.com/google/uuid"
 )
 
@@ -108,6 +109,7 @@ func GTIN(gtin string) error {
 		return ErrGtinTooLong
 	}
 
+	// FIXME: only numeric
 	// GTIN can be numeric or alphanumeric, but must not contain special characters.
 	// Also, for consistency capitalization is enforced.
 	if !regex.AlphanumericCapitalized.MatchString(gtin) {
@@ -128,10 +130,10 @@ func UnitType(t string) error {
 	}
 
 	m := map[string]bool{
-		"grams":	true,
-		"ml":		true,
-		"items":	true,
-		"portions":	true,
+		"grams":    true,
+		"ml":       true,
+		"items":    true,
+		"portions": true,
 	}
 
 	if !m[t] {

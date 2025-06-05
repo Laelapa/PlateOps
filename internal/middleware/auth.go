@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
+	"github.com/Laelapa/PlateOps/util/ctxutils"
 	"github.com/Laelapa/PlateOps/util/net"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
 
@@ -12,7 +12,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func AuthenticateWithJWT(tokenAuthority *tokenauthority.TokenAuthority, logger *logging.Logger) func(next http.Handler) http.Handler {
+func AuthenticateWithJWT(
+	tokenAuthority *tokenauthority.TokenAuthority,
+	logger *logging.Logger,
+) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -51,11 +54,13 @@ func AuthenticateWithJWT(tokenAuthority *tokenauthority.TokenAuthority, logger *
 			}
 
 			// Store the userID in the request context.
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, "userID", pgUUID)
+			ctx := ctxutils.SetUserIDInContext(r.Context(), pgUUID)
 
 			logger.LogRequestInfo("Request authenticated with JWT", r)
-			logger.LogAppInfo("Request authenticated with JWT", zap.String("userID", typeconvert.PgtypeUUIDToString(pgUUID)))
+			logger.LogAppInfo(
+				"Request authenticated with JWT",
+				zap.String("userID", typeconvert.PgtypeUUIDToString(pgUUID)),
+			)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 

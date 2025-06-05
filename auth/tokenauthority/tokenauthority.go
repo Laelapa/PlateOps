@@ -27,7 +27,13 @@ type TokenAuthority struct {
 // Returns:
 //   - *TokenAuthority: A pointer to the created TokenAuthority instance.
 //   - error: An error containing all the errors that occurred during validation, if any.
-func New(jwtSecret string, jwtIssuer string, jwtLifetime time.Duration, rtSizeInBytes int, rtLifetime time.Duration) (*TokenAuthority, error) {
+func New(
+	jwtSecret string,
+	jwtIssuer string,
+	jwtLifetime time.Duration,
+	rtSizeInBytes int,
+	rtLifetime time.Duration,
+) (*TokenAuthority, error) {
 
 	t := &TokenAuthority{
 		jwtSecret:     jwtSecret,
@@ -48,7 +54,8 @@ func (t *TokenAuthority) validateConfig() error {
 	var errs []error
 
 	if len(t.jwtSecret) < 16 {
-		errs = append(errs, errors.New("jwtSecret must be at least 16 characters long, ideally >= 32"))
+		errstr := "jwtSecret must be at least 16 characters long, ideally >= 32"
+		errs = append(errs, errors.New(errstr))
 	}
 	if t.jwtLifetime <= 0 {
 		errs = append(errs, errors.New("jwtLifetime must be a positive value"))

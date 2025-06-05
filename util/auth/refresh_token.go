@@ -3,14 +3,17 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/Laelapa/PlateOps/internal/repository"
+	"github.com/Laelapa/PlateOps/util"
 	"github.com/Laelapa/PlateOps/util/typeconvert"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
+
+// TODO: Possibly relocate DeepError to a more general package if it ends up being needed elsewhere.
 
 var (
 	ErrTokenNotExist       = errors.New("token does not exist")
@@ -46,7 +49,10 @@ func VerifyRefreshToken(
 			return ErrTokenNotExist
 		}
 
-		return fmt.Errorf("%w: %v", ErrDatabaseFailure, err)
+		return &util.DeepError{
+			BusinessErr:  ErrDatabaseFailure,
+			TechnicalErr: err,
+		}
 	}
 
 	// Check for expiration.
