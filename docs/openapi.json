@@ -401,7 +401,7 @@
         }
       }
     },
-    "/food/{id}": {
+    "/food/id/{id}": {
       "patch": {
         "summary": "Update food entry",
         "security": [{ "BearerAuth": [] }],

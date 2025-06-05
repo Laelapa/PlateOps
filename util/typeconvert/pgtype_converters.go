@@ -9,8 +9,7 @@ func PtrStringToPgtypeText(s *string) pgtype.Text {
 	return pgtype.Text{String: *s, Valid: true}
 }
 
-// FIXME: consider ptr
-func PgtypeTextToString(t pgtype.Text) string {
+func PgtypeTextToString(t pgtype.Text) string { // FIXME: consider ptr
 	if !t.Valid {
 		return ""
 	}
@@ -24,8 +23,7 @@ func PtrInt32ToPgtypeInt4(i *int32) pgtype.Int4 {
 	return pgtype.Int4{Int32: *i, Valid: true}
 }
 
-// FIXME: consider ptr
-func PgtypeInt4ToInt(i pgtype.Int4) int32 {
+func PgtypeInt4ToInt(i pgtype.Int4) int32 { // FIXME: consider ptr
 	if !i.Valid {
 		return 0
 	}
@@ -38,8 +36,8 @@ func PtrFloat32ToPgtypeFloat4(f *float32) pgtype.Float4 {
 	}
 	return pgtype.Float4{Float32: *f, Valid: true}
 }
-// FIXME: consider ptr
-func PgtypeFloat4ToFloat32(pf pgtype.Float4) float32 {
+
+func PgtypeFloat4ToFloat32(pf pgtype.Float4) float32 { // FIXME: consider ptr
 	if !pf.Valid {
 		return 0.0
 	}
@@ -53,8 +51,8 @@ func PtrBoolToPgtypeBool(b *bool) pgtype.Bool {
 	return pgtype.Bool{Bool: *b, Valid: true}
 }
 
-// FIXME: consider ptr
 func PgtypeBoolToBool(b pgtype.Bool) bool {
+	// FIXME: consider ptr
 	if !b.Valid {
 		return false
 	}

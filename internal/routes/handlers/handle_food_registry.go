@@ -17,9 +17,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var ErrGtinAlreadyExists = errors.New("GTIN already exists for another food entry")
-var ErrQueryFailed = errors.New("failed to execute database query")
-
 // requestFood represents the structure of the request body for creating or updating a food entry.
 // All fields are set to be optional to accommodate the PATCH method.
 // For fields that are necessary for other methods verify the request body in the handler.
@@ -49,6 +46,9 @@ type responseFood struct {
 	Message   string `json:"message,omitempty"`
 	ProductID int32  `json:"product_id,omitempty"`
 }
+
+var ErrGtinAlreadyExists = errors.New("GTIN already exists for another food entry")
+var ErrQueryFailed = errors.New("failed to execute database query")
 
 func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 

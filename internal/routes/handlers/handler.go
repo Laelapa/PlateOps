@@ -30,9 +30,7 @@ func New(logger *logging.Logger, queries *repository.Queries, tokenAuthority *to
 
 // TODO: Future refactor go through multiple error types to slim down the number of parameters (by removing msg and status code)
 func (h *Handler) HandleError(w http.ResponseWriter, r *http.Request, err error, msg string, statusCode int) {
-
 	h.logger.LogRequestWarn(msg, r)
 	h.logger.LogAppWarn(msg, zap.Error(err))
 	http.Error(w, msg, statusCode)
-	return
 }

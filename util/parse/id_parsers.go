@@ -11,7 +11,6 @@ import (
 	"github.com/Laelapa/PlateOps/util/validate"
 )
 
-
 // ID converts a string ID to an int32 after validation.
 // It first validates the ID, then parses the string to a 32-bit integer.
 // Returns the parsed int32 ID and nil on success,
