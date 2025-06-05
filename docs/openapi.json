@@ -99,7 +99,7 @@
       },
       "CreateFoodRequest": {
         "type": "object",
-        "required": ["name", "unit_type"],
+        "required": ["name", "unit_type", "quantity"],
         "properties": {
           "name": { "type": "string", "maxLength": 255 },
           "gtin": { "type": "string", "maxLength": 14 },
@@ -121,9 +121,50 @@
           "protein": { "type": "number", "minimum": 0 },
           "fiber": { "type": "number", "minimum": 0 },
           "sodium": { "type": "number", "minimum": 0 }
-        }
+        },
+        "additionalProperties": false
       },
       "CreateFoodResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "product_id": { "type": "integer" }
+        }
+      },
+      "UpdateFoodRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "maxLength": 255 },
+          "gtin": { "type": "string", "maxLength": 14 },
+          "category": { "type": "string", "maxLength": 255 },
+          "description": { "type": "string", "maxLength": 5000 },
+          "unit_type": {
+            "type": "string",
+            "enum": ["items", "grams", "ml", "portions"]
+          },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "portion_count": { "type": "integer", "minimum": 1 },
+          "expiration_after_opening": { "type": "integer", "minimum": 0 },
+          "nutrients_per_item": { "type": "boolean" },
+          "calories": { "type": "number", "minimum": 0 },
+          "fats": { "type": "number", "minimum": 0 },
+          "saturated": { "type": "number", "minimum": 0 },
+          "carbs": { "type": "number", "minimum": 0 },
+          "sugars": { "type": "number", "minimum": 0 },
+          "protein": { "type": "number", "minimum": 0 },
+          "fiber": { "type": "number", "minimum": 0 },
+          "sodium": { "type": "number", "minimum": 0 }
+        },
+        "additionalProperties": false,
+        "example": {
+          "name": "Organic Apple",
+          "category": "Fruits",
+          "calories": 95,
+          "carbs": 25
+        }
+      },
+      "UpdateFoodResponse": {
         "type": "object",
         "properties": {
           "success": { "type": "boolean" },
@@ -351,6 +392,82 @@
           },
           "409": {
             "description": "Food name exists",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/food/id/{id}": {
+      "patch": {
+        "summary": "Update food entry",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Product ID of the food entry to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateFoodRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Food updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UpdateFoodResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid input or product ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing JWT token",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Food entry not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "GTIN already exists for another food entry",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }

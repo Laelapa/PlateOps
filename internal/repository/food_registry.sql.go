@@ -37,23 +37,23 @@ INSERT INTO food_registry (
 `
 
 type CreateFoodEntryParams struct {
-	Name                   string        `json:"name"`
+	Name                   pgtype.Text   `json:"name"`
 	Gtin                   pgtype.Text   `json:"gtin"`
 	Category               pgtype.Text   `json:"category"`
 	Description            pgtype.Text   `json:"description"`
-	UnitType               string        `json:"unit_type"`
+	UnitType               pgtype.Text   `json:"unit_type"`
 	Quantity               pgtype.Int4   `json:"quantity"`
 	PortionCount           pgtype.Int4   `json:"portion_count"`
 	ExpirationAfterOpening pgtype.Int4   `json:"expiration_after_opening"`
 	NutrientsPerItem       pgtype.Bool   `json:"nutrients_per_item"`
 	Calories               pgtype.Float4 `json:"calories"`
-	Fats                   float32       `json:"fats"`
-	Saturated              float32       `json:"saturated"`
-	Carbs                  float32       `json:"carbs"`
-	Sugars                 float32       `json:"sugars"`
-	Protein                float32       `json:"protein"`
-	Fiber                  float32       `json:"fiber"`
-	Sodium                 float32       `json:"sodium"`
+	Fats                   pgtype.Float4 `json:"fats"`
+	Saturated              pgtype.Float4 `json:"saturated"`
+	Carbs                  pgtype.Float4 `json:"carbs"`
+	Sugars                 pgtype.Float4 `json:"sugars"`
+	Protein                pgtype.Float4 `json:"protein"`
+	Fiber                  pgtype.Float4 `json:"fiber"`
+	Sodium                 pgtype.Float4 `json:"sodium"`
 	CreatedBy              pgtype.UUID   `json:"created_by"`
 }
 
@@ -171,7 +171,7 @@ FROM food_registry
 WHERE name = $1
 `
 
-func (q *Queries) GetFoodEntriesByName(ctx context.Context, name string) ([]FoodRegistry, error) {
+func (q *Queries) GetFoodEntriesByName(ctx context.Context, name pgtype.Text) ([]FoodRegistry, error) {
 	rows, err := q.db.Query(ctx, getFoodEntriesByName, name)
 	if err != nil {
 		return nil, err
@@ -289,23 +289,23 @@ func (q *Queries) GetFoodEntryById(ctx context.Context, productID int32) (FoodRe
 const updateFoodEntry = `-- name: UpdateFoodEntry :exec
 UPDATE food_registry
 SET
-    name = $2,
-    GTIN = $3,
-    category = $4, 
-    description = $5, 
-    unit_type = $6, 
-    quantity = $7,
-    portion_count = $8,
-    expiration_after_opening = $9,
-    nutrients_per_item = $10,
-    calories = $11,
-    fats = $12,
-    saturated = $13,
-    carbs = $14,
-    sugars = $15,
-    protein = $16,
-    fiber = $17,
-    sodium = $18,
+    name = COALESCE($2, name),
+    GTIN = COALESCE($3, GTIN),
+    category = COALESCE($4, category),
+    description = COALESCE($5, description),
+    unit_type = COALESCE($6, unit_type),
+    quantity = COALESCE($7, quantity),
+    portion_count = COALESCE($8, portion_count),
+    expiration_after_opening = COALESCE($9, expiration_after_opening),
+    nutrients_per_item = COALESCE($10, nutrients_per_item),
+    calories = COALESCE($11, calories),
+    fats = COALESCE($12, fats),
+    saturated = COALESCE($13, saturated),
+    carbs = COALESCE($14, carbs),
+    sugars = COALESCE($15, sugars),
+    protein = COALESCE($16, protein),
+    fiber = COALESCE($17, fiber),
+    sodium = COALESCE($18, sodium),
     updated_at = CURRENT_TIMESTAMP,
     updated_by = $19
 WHERE product_id = $1
@@ -313,23 +313,23 @@ WHERE product_id = $1
 
 type UpdateFoodEntryParams struct {
 	ProductID              int32         `json:"product_id"`
-	Name                   string        `json:"name"`
+	Name                   pgtype.Text   `json:"name"`
 	Gtin                   pgtype.Text   `json:"gtin"`
 	Category               pgtype.Text   `json:"category"`
 	Description            pgtype.Text   `json:"description"`
-	UnitType               string        `json:"unit_type"`
+	UnitType               pgtype.Text   `json:"unit_type"`
 	Quantity               pgtype.Int4   `json:"quantity"`
 	PortionCount           pgtype.Int4   `json:"portion_count"`
 	ExpirationAfterOpening pgtype.Int4   `json:"expiration_after_opening"`
 	NutrientsPerItem       pgtype.Bool   `json:"nutrients_per_item"`
 	Calories               pgtype.Float4 `json:"calories"`
-	Fats                   float32       `json:"fats"`
-	Saturated              float32       `json:"saturated"`
-	Carbs                  float32       `json:"carbs"`
-	Sugars                 float32       `json:"sugars"`
-	Protein                float32       `json:"protein"`
-	Fiber                  float32       `json:"fiber"`
-	Sodium                 float32       `json:"sodium"`
+	Fats                   pgtype.Float4 `json:"fats"`
+	Saturated              pgtype.Float4 `json:"saturated"`
+	Carbs                  pgtype.Float4 `json:"carbs"`
+	Sugars                 pgtype.Float4 `json:"sugars"`
+	Protein                pgtype.Float4 `json:"protein"`
+	Fiber                  pgtype.Float4 `json:"fiber"`
+	Sodium                 pgtype.Float4 `json:"sodium"`
 	UpdatedBy              pgtype.UUID   `json:"updated_by"`
 }
 

@@ -54,7 +54,7 @@ func Setup(
 	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
 	mux.Handle("POST /food", withAuth(h.HandlePostFood))
-	// mux.HandleFunc("PUT /food/id/{id}", h.HandlePutFood)
+	mux.Handle("PATCH /food/id/{id}", withAuth(h.HandlePatchFood))
 	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)
 
 	// mux.HandleFunc("GET /foods", h.HandleGetFoods)

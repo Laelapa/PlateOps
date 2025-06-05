@@ -11,23 +11,23 @@ import (
 
 type FoodRegistry struct {
 	ProductID              int32            `json:"product_id"`
-	Name                   string           `json:"name"`
+	Name                   pgtype.Text      `json:"name"`
 	Gtin                   pgtype.Text      `json:"gtin"`
 	Category               pgtype.Text      `json:"category"`
 	Description            pgtype.Text      `json:"description"`
-	UnitType               string           `json:"unit_type"`
+	UnitType               pgtype.Text      `json:"unit_type"`
 	Quantity               pgtype.Int4      `json:"quantity"`
 	PortionCount           pgtype.Int4      `json:"portion_count"`
 	ExpirationAfterOpening pgtype.Int4      `json:"expiration_after_opening"`
 	NutrientsPerItem       pgtype.Bool      `json:"nutrients_per_item"`
 	Calories               pgtype.Float4    `json:"calories"`
-	Fats                   float32          `json:"fats"`
-	Saturated              float32          `json:"saturated"`
-	Carbs                  float32          `json:"carbs"`
-	Sugars                 float32          `json:"sugars"`
-	Protein                float32          `json:"protein"`
-	Fiber                  float32          `json:"fiber"`
-	Sodium                 float32          `json:"sodium"`
+	Fats                   pgtype.Float4    `json:"fats"`
+	Saturated              pgtype.Float4    `json:"saturated"`
+	Carbs                  pgtype.Float4    `json:"carbs"`
+	Sugars                 pgtype.Float4    `json:"sugars"`
+	Protein                pgtype.Float4    `json:"protein"`
+	Fiber                  pgtype.Float4    `json:"fiber"`
+	Sodium                 pgtype.Float4    `json:"sodium"`
 	CreatedAt              pgtype.Timestamp `json:"created_at"`
 	UpdatedAt              pgtype.Timestamp `json:"updated_at"`
 	CreatedBy              pgtype.UUID      `json:"created_by"`
@@ -58,22 +58,22 @@ type InventoryItemWithInfo struct {
 	OpenedDate             pgtype.Timestamp `json:"opened_date"`
 	CreatedAt              pgtype.Timestamp `json:"created_at"`
 	UpdatedAt              pgtype.Timestamp `json:"updated_at"`
-	Name                   string           `json:"name"`
+	Name                   pgtype.Text      `json:"name"`
 	Gtin                   pgtype.Text      `json:"gtin"`
 	Category               pgtype.Text      `json:"category"`
 	Description            pgtype.Text      `json:"description"`
-	UnitType               string           `json:"unit_type"`
+	UnitType               pgtype.Text      `json:"unit_type"`
 	Quantity               pgtype.Int4      `json:"quantity"`
 	ExpirationAfterOpening pgtype.Int4      `json:"expiration_after_opening"`
 	NutrientsPerItem       pgtype.Bool      `json:"nutrients_per_item"`
 	Calories               pgtype.Float4    `json:"calories"`
-	Fats                   float32          `json:"fats"`
-	Saturated              float32          `json:"saturated"`
-	Carbs                  float32          `json:"carbs"`
-	Sugars                 float32          `json:"sugars"`
-	Protein                float32          `json:"protein"`
-	Fiber                  float32          `json:"fiber"`
-	Sodium                 float32          `json:"sodium"`
+	Fats                   pgtype.Float4    `json:"fats"`
+	Saturated              pgtype.Float4    `json:"saturated"`
+	Carbs                  pgtype.Float4    `json:"carbs"`
+	Sugars                 pgtype.Float4    `json:"sugars"`
+	Protein                pgtype.Float4    `json:"protein"`
+	Fiber                  pgtype.Float4    `json:"fiber"`
+	Sodium                 pgtype.Float4    `json:"sodium"`
 }
 
 type Recipe struct {
