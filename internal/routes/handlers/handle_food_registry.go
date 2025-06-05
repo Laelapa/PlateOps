@@ -13,7 +13,6 @@ import (
 	"github.com/Laelapa/PlateOps/util/typeconvert"
 	"github.com/Laelapa/PlateOps/util/validate"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/zap"
@@ -26,23 +25,23 @@ var ErrQueryFailed = errors.New("failed to execute database query")
 // All fields are set to be optional to accommodate the PATCH method.
 // For fields that are necessary for other methods verify the request body in the handler.
 type requestFood struct {
-	Name                   string  `json:"name,omitempty" validate:"omitempty,min=1,max=255"`
-	Gtin                   string  `json:"gtin,omitempty" validate:"omitempty,numeric, max=14"` // GTIN-14
-	Category               string  `json:"category,omitempty" validate:"omitempty,max=255"`
-	Description            string  `json:"description,omitempty" validate:"omitempty,max=5000"`
-	UnitType               string  `json:"unit_type,omitempty" validate:"omitempty,oneof=grams ml items portions"`
+	Name                   string  `json:"name,omitempty"                     validate:"omitempty,min=1,max=255"`
+	Gtin                   string  `json:"gtin,omitempty"                     validate:"omitempty,numeric, max=14"` // GTIN-14
+	Category               string  `json:"category,omitempty"                 validate:"omitempty,max=255"`
+	Description            string  `json:"description,omitempty"              validate:"omitempty,max=5000"`
+	UnitType               string  `json:"unit_type,omitempty"                validate:"omitempty,oneof=grams ml items portions"`
 	Quantity               int32   `json:"quantity,omitempty"`
-	PortionCount           int32   `json:"portion_count,omitempty" validate:"omitempty,min=1"`	// Number of portions in the food item
+	PortionCount           int32   `json:"portion_count,omitempty"            validate:"omitempty,min=1"` // Number of portions in the food item
 	ExpirationAfterOpening int32   `json:"expiration_after_opening,omitempty" validate:"omitempty,min=0"` // in days
-	NutrientsPerItem       bool    `json:"nutrients_per_item,omitempty"`       // true: per item/portion, false: per 100g
-	Calories               float32 `json:"calories,omitempty" validate:"omitempty,min=0"`
-	Fats                   float32 `json:"fats,omitempty" validate:"omitempty,min=0"`
-	Saturated              float32 `json:"saturated,omitempty" validate:"omitempty,min=0"`
-	Carbs                  float32 `json:"carbs,omitempty" validate:"omitempty,min=0"`
-	Sugars                 float32 `json:"sugars,omitempty" validate:"omitempty,min=0"`
-	Protein                float32 `json:"protein,omitempty" validate:"omitempty,min=0"`
-	Fiber                  float32 `json:"fiber,omitempty" validate:"omitempty,min=0"`
-	Sodium                 float32 `json:"sodium,omitempty" validate:"omitempty,min=0"`
+	NutrientsPerItem       bool    `json:"nutrients_per_item,omitempty"`                                  // true: per item/portion, false: per 100g
+	Calories               float32 `json:"calories,omitempty"                 validate:"omitempty,min=0"`
+	Fats                   float32 `json:"fats,omitempty"                     validate:"omitempty,min=0"`
+	Saturated              float32 `json:"saturated,omitempty"                validate:"omitempty,min=0"`
+	Carbs                  float32 `json:"carbs,omitempty"                    validate:"omitempty,min=0"`
+	Sugars                 float32 `json:"sugars,omitempty"                   validate:"omitempty,min=0"`
+	Protein                float32 `json:"protein,omitempty"                  validate:"omitempty,min=0"`
+	Fiber                  float32 `json:"fiber,omitempty"                    validate:"omitempty,min=0"`
+	Sodium                 float32 `json:"sodium,omitempty"                   validate:"omitempty,min=0"`
 }
 
 type responseFood struct {
@@ -68,37 +67,30 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 	h.logger.LogRequestInfo("Inserting new food to the registry", r)
 
 	if err := json.NewDecoder(r.Body).Decode(&rBody); err != nil {
-		h.logger.LogRequestWarn("Couldn't decode request body", r)
-		h.logger.LogAppWarn("Couldn't decode request body", zap.Error(err))
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		h.HandleError(w, r, err, "Couldn't decode request body", http.StatusBadRequest)
 		return
 	}
 
-	if err := ; err != nil {
-		// If validation fails, log the error and return a bad request response
-		h.logger.LogRequestWarn("Invalid request body", r)
-		h.logger.LogAppWarn("Invalid request body", zap.Error(err))
-		http.Error(w, "Bad request: "+err.Error(), http.StatusBadRequest)
+	if err := h.validator.Struct(rBody); err != nil {
+		h.HandleError(w, r, err, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Verify that the required fields are present.
 	if rBody.Name == "" || rBody.UnitType == "" || rBody.Quantity == 0 {
-		h.logger.LogRequestWarn("Invalid request body: missing required fields", r)
-		http.Error(w, "Bad request: missing required fields", http.StatusBadRequest)
+		hErr := errors.New("request body missing required fields")
+		h.HandleError(w, r, hErr, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
 	// Validate request fields
 	if valErr := h.validateFoodRequestParams(ctx, rBody); valErr != nil {
 		if errors.Is(valErr, ErrQueryFailed) {
-			h.logger.LogAppError("Failed to validate request parameters", valErr)
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			h.HandleError(w, r, valErr, "internal error during validation",
+			http.StatusInternalServerError)
 			return
 		}
-		h.logger.LogRequestWarn("Invalid request body", r)
-		h.logger.LogAppWarn("Invalid request body", zap.Error(valErr))
-		http.Error(w, "Bad request: "+valErr.Error(), http.StatusBadRequest)
+		h.HandleError(w, r, valErr, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
@@ -108,8 +100,7 @@ func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 	// Register the food entry with the database
 	foodEntry, err := h.queries.CreateFoodEntry(ctx, dbParams)
 	if err != nil {
-		h.logger.LogAppError("Failed to create food entry in the database", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		h.HandleError(w, r, err, "db error", http.StatusInternalServerError)
 		return
 	}
 
