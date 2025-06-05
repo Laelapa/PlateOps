@@ -26,7 +26,7 @@ var ErrQueryFailed = errors.New("failed to execute database query")
 // Check for presence of a field in a request by checking if the pointer is nil.
 type requestFood struct {
 	Name                   *string  `json:"name,omitempty"                     validate:"omitempty,max=255"`
-	Gtin                   *string  `json:"gtin,omitempty"                     validate:"omitempty,numeric, max=14"` // GTIN-14
+	Gtin                   *string  `json:"gtin,omitempty"                     validate:"omitempty,numeric,max=14"` // GTIN-14
 	Category               *string  `json:"category,omitempty"                 validate:"omitempty,max=255"`
 	Description            *string  `json:"description,omitempty"              validate:"omitempty,max=5000"`
 	UnitType               *string  `json:"unit_type,omitempty"                validate:"omitempty,oneof=grams ml items portions"`
