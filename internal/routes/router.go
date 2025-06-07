@@ -50,7 +50,7 @@ func Setup(
 	// -- mux.HandleFunc("GET /reset-password", h.HandleGetResetPassword)
 	// mux.HandleFunc("POST /reset-password", h.HandlePostResetPassword)
 
-	// mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
+	mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
 	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
 	mux.Handle("POST /food", withAuth(h.HandlePostFood))
