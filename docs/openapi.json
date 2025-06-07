@@ -633,6 +633,133 @@
           }
         }
       }
+    },
+    "/foods/name/{name}": {
+      "get": {
+        "summary": "Search food entries by name (partial matching)",
+        "description": "Search for food entries where the name contains the search term. Uses fuzzy matching to find partial matches and handle typos.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "description": "Search term to find in food names. Supports partial matching (e.g., 'apple' finds 'Apple Juice', 'Pineapple')",
+            "example": "apple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food entries found successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "foods": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FoodDetailResponse"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of food entries found"
+                    }
+                  },
+                  "example": {
+                    "foods": [
+                      {
+                        "id": 1,
+                        "name": "Apple",
+                        "gtin": "1234567890123",
+                        "category": "Fruits",
+                        "description": "Fresh red apple",
+                        "unit_type": "items",
+                        "quantity": 1,
+                        "portion_count": 1,
+                        "expiration_after_opening": null,
+                        "nutrients_per_item": true,
+                        "calories": 95.0,
+                        "fats": 0.3,
+                        "saturated": 0.1,
+                        "carbs": 25.0,
+                        "sugars": 19.0,
+                        "protein": 0.5,
+                        "fiber": 4.0,
+                        "sodium": 2.0
+                      },
+                      {
+                        "id": 15,
+                        "name": "Apple Juice",
+                        "gtin": "9876543210987",
+                        "category": "Beverages",
+                        "description": "100% pure apple juice",
+                        "unit_type": "ml",
+                        "quantity": 1000,
+                        "portion_count": 4,
+                        "expiration_after_opening": 3,
+                        "nutrients_per_item": false,
+                        "calories": 46.0,
+                        "fats": 0.1,
+                        "saturated": 0.0,
+                        "carbs": 11.0,
+                        "sugars": 10.0,
+                        "protein": 0.1,
+                        "fiber": 0.2,
+                        "sodium": 4.0
+                      }
+                    ],
+                    "count": 2
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid search term",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "empty_name": {
+                    "summary": "Empty search term",
+                    "value": {
+                      "error": "Invalid food name",
+                      "message": "Search term cannot be empty"
+                    }
+                  },
+                  "name_too_long": {
+                    "summary": "Search term too long",
+                    "value": {
+                      "error": "Invalid food name",
+                      "message": "Search term cannot exceed 255 characters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Food Registry"]
+      }
     }
   }
 }

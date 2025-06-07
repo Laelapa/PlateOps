@@ -112,6 +112,62 @@ func (h *Handler) HandleGetFoodByGtin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) HandleGetFoodsByNameContains(w http.ResponseWriter, r *http.Request) {
+
+	h.logger.LogRequestInfo("Fetching food entries by name", r)
+
+	ctx := r.Context()
+	foodName := r.PathValue("name")
+
+	// Validate the name parameter
+	if foodName == "" {
+		h.HandleError(w, r, errors.New("missing food name"), "Invalid food name", http.StatusBadRequest)
+		return
+	}
+
+	// Optional: Add length validation to match your struct validation
+	if len(foodName) > 255 {
+		h.HandleError(w, r, errors.New("food name too long"), "Invalid food name", http.StatusBadRequest)
+		return
+	}
+
+	// Convert string to pgtype.Text for database query
+	nameParam := typeconvert.StringToPgtypeText(foodName)
+
+	foodEntries, err := h.queries.GetFoodEntriesByNameContains(ctx, nameParam)
+	if err != nil {
+		h.HandleError(w, r, err, "db error", http.StatusInternalServerError)
+		return
+	}
+
+	// Convert database results to response format
+	var foods []food
+	for _, entry := range foodEntries {
+		foods = append(foods, convertToFoodResponse(entry))
+	}
+
+	// Create response structure
+	response := struct {
+		Foods []food `json:"foods"`
+		Count int    `json:"count"`
+	}{
+		Foods: foods,
+		Count: len(foods),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.LogAppError("Failed to encode response", err)
+	}
+
+	h.logger.LogAppInfo(
+		"Food entries retrieved successfully",
+		zap.String("name", foodName),
+		zap.Int("count", len(foods)),
+	)
+}
+
 func (h *Handler) HandlePostFood(w http.ResponseWriter, r *http.Request) {
 
 	var rBody food

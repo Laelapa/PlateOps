@@ -57,7 +57,7 @@ func Setup(
 	mux.Handle("PATCH /food/id/{id}", withAuth(h.HandlePatchFood))
 	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)
 
-	// mux.HandleFunc("GET /foods", h.HandleGetFoods)
+	mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByNameContains)
 	// mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
 	// mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
 
