@@ -178,6 +178,47 @@
           "error": { "type": "string" },
           "message": { "type": "string" }
         }
+      },
+      "FoodDetailResponse": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "nullable": true },
+          "gtin": { "type": "string", "nullable": true },
+          "category": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "unit_type": { "type": "string", "nullable": true },
+          "quantity": { "type": "integer", "nullable": true },
+          "portion_count": { "type": "integer", "nullable": true },
+          "expiration_after_opening": { "type": "integer", "nullable": true },
+          "nutrients_per_item": { "type": "boolean", "nullable": true },
+          "calories": { "type": "number", "nullable": true },
+          "fats": { "type": "number", "nullable": true },
+          "saturated": { "type": "number", "nullable": true },
+          "carbs": { "type": "number", "nullable": true },
+          "sugars": { "type": "number", "nullable": true },
+          "protein": { "type": "number", "nullable": true },
+          "fiber": { "type": "number", "nullable": true },
+          "sodium": { "type": "number", "nullable": true }
+        },
+        "example": {
+          "name": "Apple",
+          "gtin": null,
+          "category": "Fruits",
+          "description": null,
+          "unit_type": "items",
+          "quantity": 1,
+          "portion_count": null,
+          "expiration_after_opening": null,
+          "nutrients_per_item": true,
+          "calories": 95.0,
+          "fats": null,
+          "saturated": null,
+          "carbs": 25.0,
+          "sugars": 19.0,
+          "protein": 0.5,
+          "fiber": null,
+          "sodium": null
+        }
       }
     }
   },
@@ -402,6 +443,56 @@
       }
     },
     "/food/id/{id}": {
+      "get": {
+        "summary": "Get food entry by ID",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Product ID of the food entry to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food entry retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FoodDetailResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid product ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Food entry not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "summary": "Update food entry",
         "security": [{ "BearerAuth": [] }],
