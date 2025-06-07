@@ -102,7 +102,11 @@
         "required": ["name", "unit_type", "quantity"],
         "properties": {
           "name": { "type": "string", "maxLength": 255 },
-          "gtin": { "type": "string", "maxLength": 14 },
+          "gtin": { 
+            "type": "string", 
+            "pattern": "^[0-9]{8,14}$", 
+            "maxLength": 14 
+          },
           "category": { "type": "string", "maxLength": 255 },
           "description": { "type": "string", "maxLength": 5000 },
           "unit_type": {
@@ -136,7 +140,11 @@
         "type": "object",
         "properties": {
           "name": { "type": "string", "maxLength": 255 },
-          "gtin": { "type": "string", "maxLength": 14 },
+          "gtin": { 
+            "type": "string", 
+            "pattern": "^[0-9]{8,14}$", 
+            "maxLength": 14 
+          },
           "category": { "type": "string", "maxLength": 255 },
           "description": { "type": "string", "maxLength": 5000 },
           "unit_type": {
@@ -182,8 +190,13 @@
       "FoodDetailResponse": {
         "type": "object",
         "properties": {
+          "id": { "type": "integer" },
           "name": { "type": "string", "nullable": true },
-          "gtin": { "type": "string", "nullable": true },
+          "gtin": { 
+            "type": "string", 
+            "pattern": "^[0-9]{8,14}$", 
+            "nullable": true 
+          },
           "category": { "type": "string", "nullable": true },
           "description": { "type": "string", "nullable": true },
           "unit_type": { "type": "string", "nullable": true },
@@ -201,6 +214,7 @@
           "sodium": { "type": "number", "nullable": true }
         },
         "example": {
+          "id": 5827,
           "name": "Apple",
           "gtin": null,
           "category": "Fruits",
@@ -551,6 +565,58 @@
           },
           "409": {
             "description": "GTIN already exists for another food entry",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/food/gtin/{gtin}": {
+      "get": {
+        "summary": "Get food entry by GTIN",
+        "security": [],
+        "parameters": [
+          {
+            "name": "gtin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{1,14}$"
+            },
+            "description": "Product GTIN of the food entry to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food entry retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FoodDetailResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid product GTIN",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Food entry not found",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/ErrorResponse" }

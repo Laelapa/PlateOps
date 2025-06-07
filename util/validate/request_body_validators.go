@@ -104,21 +104,6 @@ func Text(t string) error {
 	return nil
 }
 
-func GTIN(gtin string) error {
-	if len(gtin) > gtinMaxLength {
-		return ErrGtinTooLong
-	}
-
-	// FIXME: only numeric
-	// GTIN can be numeric or alphanumeric, but must not contain special characters.
-	// Also, for consistency capitalization is enforced.
-	if !regex.AlphanumericCapitalized.MatchString(gtin) {
-		return ErrInvalidGtinFormat
-	}
-
-	return nil
-}
-
 func UnitType(t string) error {
 	if len(t) > foodUnitTypeMaxLength {
 		return ErrStringTooLong
