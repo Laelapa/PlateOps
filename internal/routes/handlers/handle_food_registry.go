@@ -50,7 +50,7 @@ type responseFood struct {
 var ErrGtinAlreadyExists = errors.New("GTIN already exists for another food entry")
 var ErrQueryFailed = errors.New("failed to execute database query")
 
-func (h *Handler) HandleGetFoodById(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) HandleGetFoodByID(w http.ResponseWriter, r *http.Request) {
 
 	h.logger.LogRequestInfo("Fetching food entry by ID", r)
 
@@ -228,7 +228,7 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 
 func convertToFoodResponse(foodEntry repository.FoodRegistry) food {
 
-	return food {
+	return food{
 		Name:                   typeconvert.PgtypeTextToPtrString(foodEntry.Name),
 		Gtin:                   typeconvert.PgtypeTextToPtrString(foodEntry.Gtin),
 		Category:               typeconvert.PgtypeTextToPtrString(foodEntry.Category),
@@ -255,7 +255,7 @@ func convertToCreateFoodEntryParams(
 	userID pgtype.UUID,
 ) repository.CreateFoodEntryParams {
 
-	params := repository.CreateFoodEntryParams{
+	return repository.CreateFoodEntryParams{
 		Name:                   typeconvert.PtrStringToPgtypeText(req.Name),
 		Gtin:                   typeconvert.PtrStringToPgtypeText(req.Gtin),
 		Category:               typeconvert.PtrStringToPgtypeText(req.Category),
@@ -275,8 +275,6 @@ func convertToCreateFoodEntryParams(
 		Sodium:                 typeconvert.PtrFloat32ToPgtypeFloat4(req.Sodium),
 		CreatedBy:              userID,
 	}
-
-	return params
 }
 
 func convertToUpdateFoodEntryParams(
@@ -285,7 +283,7 @@ func convertToUpdateFoodEntryParams(
 	productID int32,
 ) repository.UpdateFoodEntryParams {
 
-	params := repository.UpdateFoodEntryParams{
+	return repository.UpdateFoodEntryParams{
 		Name:                   typeconvert.PtrStringToPgtypeText(req.Name),
 		Gtin:                   typeconvert.PtrStringToPgtypeText(req.Gtin),
 		Category:               typeconvert.PtrStringToPgtypeText(req.Category),
@@ -306,8 +304,6 @@ func convertToUpdateFoodEntryParams(
 		ProductID:              productID,
 		UpdatedBy:              userID,
 	}
-
-	return params
 }
 
 func (h *Handler) checkGtinUniqueness(ctx context.Context, gtin *string, productID int32) error {
