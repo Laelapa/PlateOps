@@ -300,7 +300,7 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.publishFoodPatchEvent(ctx, productID)
+	h.publishFoodPatchEvent(context.Background(), productID)
 
 	resp := responseFood{
 		Success:   true,
@@ -442,7 +442,7 @@ func (h *Handler) publishFoodPatchEvent(ctx context.Context, productID int32) {
 	}
 
 	record := &kgo.Record{
-		Topic: "food_updates",
+		Topic: "food.updates",
 		Value: eventBytes,
 	}
 
