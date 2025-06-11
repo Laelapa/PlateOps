@@ -5,6 +5,8 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/twmb/franz-go/pkg/kgo"
+
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/repository"
 
@@ -16,14 +18,21 @@ type Handler struct {
 	logger         *logging.Logger
 	queries        *repository.Queries
 	tokenAuthority *tokenauthority.TokenAuthority
+	kafkaClient    *kgo.Client
 	validator      *validator.Validate
 }
 
-func New(logger *logging.Logger, queries *repository.Queries, tokenAuthority *tokenauthority.TokenAuthority) *Handler {
+func New(
+	logger *logging.Logger,
+	queries *repository.Queries,
+	tokenAuthority *tokenauthority.TokenAuthority,
+	kafkaClient *kgo.Client,
+) *Handler {
 	return &Handler{
 		logger:         logger,
 		queries:        queries,
 		tokenAuthority: tokenAuthority,
+		kafkaClient:    kafkaClient,
 		validator:      validator.New(validator.WithRequiredStructEnabled()),
 	}
 }
