@@ -110,7 +110,7 @@ func run() error {
 	}
 	logger.LogAppInfo("Token authority initialized")
 
-	var kafkaClient *kgo.Client	// nil
+	var kafkaClient *kgo.Client // nil
 	kafkaBrokers := os.Getenv("KAFKA_BROKERS")
 	if kafkaBrokers != "" {
 		client, err := kgo.NewClient(
