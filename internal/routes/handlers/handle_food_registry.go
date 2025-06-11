@@ -6,6 +6,8 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/twmb/franz-go/pkg/kgo"
+
 	"github.com/Laelapa/PlateOps/internal/repository"
 	"github.com/Laelapa/PlateOps/util"
 	"github.com/Laelapa/PlateOps/util/ctxutils"
@@ -298,6 +300,8 @@ func (h *Handler) HandlePatchFood(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.publishFoodPatchEvent(context.Background(), productID)
+
 	resp := responseFood{
 		Success:   true,
 		Message:   "Food entry updated successfully",
@@ -418,4 +422,40 @@ func (h *Handler) checkGtinUniqueness(ctx context.Context, gtin *string, product
 	}
 
 	return nil // GTIN matches the current food entry
+}
+
+func (h *Handler) publishFoodPatchEvent(ctx context.Context, productID int32) {
+	if h.kafkaClient == nil {
+		h.logger.LogAppWarn("Kafka client is not initialized, skipping event publishing")
+		return
+	}
+
+	eventData := map[string]interface{}{
+		"event":   "food.updated",
+		"food_id": productID,
+	}
+
+	eventBytes, err := json.Marshal(eventData)
+	if err != nil {
+		h.logger.LogAppError("Failed to marshal food update event", err)
+		return
+	}
+
+	record := &kgo.Record{
+		Topic: "food.updates",
+		Value: eventBytes,
+	}
+
+	h.kafkaClient.Produce(ctx, record, func(r *kgo.Record, err error) {
+		if err != nil {
+			h.logger.LogAppError("Failed to send food update event", err)
+		} else {
+			h.logger.LogAppInfo("Food update event published successfully",
+				zap.Int32("food_id", productID),
+				zap.String("topic", r.Topic),
+				zap.Int32("partition", r.Partition),
+				zap.Int64("offset", r.Offset),
+				zap.Time("kafka_timestamp", r.Timestamp))
+		}
+	})
 }

@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/twmb/franz-go/pkg/kgo"
+
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/env"
 	"github.com/Laelapa/PlateOps/internal/middleware"
@@ -25,12 +27,10 @@ type serverOptions struct {
 }
 
 type App struct {
-	ctx            context.Context
-	logger         *logging.Logger
-	queries        *repository.Queries
-	tokenAuthority *tokenauthority.TokenAuthority
-	server         *http.Server
-	serverOptions  *serverOptions
+	ctx           context.Context
+	logger        *logging.Logger
+	server        *http.Server
+	serverOptions *serverOptions
 }
 
 const (
@@ -53,6 +53,7 @@ func New(
 	logger *logging.Logger,
 	queries *repository.Queries,
 	tokenAuthority *tokenauthority.TokenAuthority,
+	kafkaClient *kgo.Client,
 	port string,
 	staticDir string,
 	shutdownTimeout time.Duration,
@@ -64,13 +65,11 @@ func New(
 	}
 
 	return &App{
-		ctx:            ctx,
-		logger:         logger,
-		queries:        queries,
-		tokenAuthority: tokenAuthority,
+		ctx:    ctx,
+		logger: logger,
 		server: &http.Server{
 			Addr:              fmt.Sprintf(":%s", env.ValidatePort(port, logger)),
-			Handler:           newMux(staticDir, logger, queries, tokenAuthority),
+			Handler:           newMux(staticDir, logger, queries, tokenAuthority, kafkaClient),
 			ReadHeaderTimeout: defaultReadHeaderTimeout, // Prevents slow header attacks
 			ReadTimeout:       defaultReadTimeout,       // Prevents slow request attacks
 			WriteTimeout:      defaultWriteTimeout,      // Prevents clients from keeping connections open
@@ -89,9 +88,10 @@ func newMux(
 	logger *logging.Logger,
 	queries *repository.Queries,
 	tokenAuthority *tokenauthority.TokenAuthority,
+	kafkaClient *kgo.Client,
 ) http.Handler {
 
-	mux := routes.Setup(staticDir, logger, queries, tokenAuthority)
+	mux := routes.Setup(staticDir, logger, queries, tokenAuthority, kafkaClient)
 
 	return attachBasicMiddleware(mux, logger)
 }
