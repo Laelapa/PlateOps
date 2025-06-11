@@ -36,3 +36,24 @@ func ID(id string) error {
 
 	return nil
 }
+
+func GTIN(gtin string) error {
+	if len(gtin) == 0 {
+		return errors.New("missing GTIN")
+	}
+
+	if len(gtin) < 8 || len(gtin) > 14 {
+		return errors.New("invalid GTIN length")
+	}
+
+	intGTIN, err := strconv.ParseInt(gtin, 10, 32)
+	if err != nil {
+		return errors.New("invalid GTIN format")
+	}
+
+	if intGTIN <= 0 {
+		return errors.New("invalid GTIN value")
+	}
+
+	return nil
+}

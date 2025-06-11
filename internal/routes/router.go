@@ -50,14 +50,14 @@ func Setup(
 	// -- mux.HandleFunc("GET /reset-password", h.HandleGetResetPassword)
 	// mux.HandleFunc("POST /reset-password", h.HandlePostResetPassword)
 
-	// mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodById)
-	// mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
+	mux.HandleFunc("GET /food/id/{id}", h.HandleGetFoodByID)
+	mux.HandleFunc("GET /food/gtin/{gtin}", h.HandleGetFoodByGtin)
 
 	mux.Handle("POST /food", withAuth(h.HandlePostFood))
 	mux.Handle("PATCH /food/id/{id}", withAuth(h.HandlePatchFood))
 	// mux.HandleFunc("DELETE /food/id/{id}", h.HandleDeleteFood)
 
-	// mux.HandleFunc("GET /foods", h.HandleGetFoods)
+	mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByNameContains)
 	// mux.HandleFunc("GET /foods/category/{category}", h.HandleGetFoodsByCategory)
 	// mux.HandleFunc("GET /foods/name/{name}", h.HandleGetFoodsByName)
 
