@@ -113,18 +113,16 @@ func run() error {
 	var kafkaClient *kgo.Client // nil
 	kafkaBrokers := os.Getenv("KAFKA_BROKERS")
 	if kafkaBrokers != "" {
-		client, err := kgo.NewClient(
+		client, kErr := kgo.NewClient(
 			kgo.SeedBrokers(strings.Split(kafkaBrokers, ",")...),
 			kgo.ClientID(os.Getenv("SERVICE_NAME")),
 		)
-		if err != nil {
-			return fmt.Errorf("error creating Kafka client: %w", err)
-		} else {
-			logger.LogAppInfo("Kafka client created", zap.String("brokers", kafkaBrokers))
-			kafkaClient = client
+		if kErr != nil {
+			return fmt.Errorf("error creating Kafka client: %w", kErr)
 		}
-		// If Kafka is not configured, kafkaClient remains nil
-	}
+		logger.LogAppInfo("Kafka client created", zap.String("brokers", kafkaBrokers))
+		kafkaClient = client
+	} // If Kafka is not configured, kafkaClient remains nil
 
 	// Parse the server shutdown timeout from the environment
 	shutdownTimeout, err := time.ParseDuration(os.Getenv("SERVER_SHUTDOWN_TIMEOUT") + "s")

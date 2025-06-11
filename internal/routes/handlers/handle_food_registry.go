@@ -450,7 +450,12 @@ func (h *Handler) publishFoodPatchEvent(ctx context.Context, productID int32) {
 		if err != nil {
 			h.logger.LogAppError("Failed to send food update event", err)
 		} else {
-			h.logger.LogAppInfo("Food update event published successfully", zap.Int32("food_id", productID))
+			h.logger.LogAppInfo("Food update event published successfully",
+				zap.Int32("food_id", productID),
+				zap.String("topic", r.Topic),
+				zap.Int32("partition", r.Partition),
+				zap.Int64("offset", r.Offset),
+				zap.Time("kafka_timestamp", r.Timestamp))
 		}
 	})
 }
