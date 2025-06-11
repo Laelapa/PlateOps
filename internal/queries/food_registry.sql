@@ -32,10 +32,13 @@ SELECT *
 FROM food_registry
 WHERE GTIN = $1;
 
--- name: GetFoodEntriesByName :many
+-- name: GetFoodEntriesByNameContains :many
 SELECT *
 FROM food_registry
-WHERE name = $1;
+WHERE LOWER(name) LIKE LOWER('%' || $1 || '%')
+OR similarity(LOWER(name), LOWER($1)) > 0.4
+ORDER BY similarity(LOWER(name), LOWER($1)) DESC, LENGTH(name), name
+LIMIT 50;
 
 -- name: GetFoodEntriesByCategory :many
 SELECT *

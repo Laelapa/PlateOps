@@ -13,6 +13,7 @@ import (
 // The token includes standard registered claims (issuer, subject, issued at, expires at)
 // and is signed using HMAC SHA256 algorithm with the configured secret.
 // The token's lifetime and the jwtSecret are properties of the TokenAuthority instance.
+// Verification of the user ID must be done by the caller.
 //
 // Parameters:
 //   - userID: The UUID of the user for whom the token is being issued
@@ -22,11 +23,13 @@ import (
 //   - error: An error if token signing fails, nil otherwise
 func (t *TokenAuthority) IssueJWT(userID uuid.UUID) (string, error) {
 
+	now := time.Now().UTC()
+
 	claims := jwt.RegisteredClaims{
 		Issuer:    t.jwtIssuer,
 		Subject:   userID.String(),
-		IssuedAt:  jwt.NewNumericDate(time.Now().UTC()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().UTC().Add(t.jwtLifetime)),
+		IssuedAt:  jwt.NewNumericDate(now),
+		ExpiresAt: jwt.NewNumericDate(now.Add(t.jwtLifetime)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

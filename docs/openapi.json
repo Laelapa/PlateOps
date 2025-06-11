@@ -102,7 +102,11 @@
         "required": ["name", "unit_type", "quantity"],
         "properties": {
           "name": { "type": "string", "maxLength": 255 },
-          "gtin": { "type": "string", "maxLength": 14 },
+          "gtin": { 
+            "type": "string", 
+            "pattern": "^[0-9]{8,14}$", 
+            "maxLength": 14 
+          },
           "category": { "type": "string", "maxLength": 255 },
           "description": { "type": "string", "maxLength": 5000 },
           "unit_type": {
@@ -136,7 +140,11 @@
         "type": "object",
         "properties": {
           "name": { "type": "string", "maxLength": 255 },
-          "gtin": { "type": "string", "maxLength": 14 },
+          "gtin": { 
+            "type": "string", 
+            "pattern": "^[0-9]{8,14}$", 
+            "maxLength": 14 
+          },
           "category": { "type": "string", "maxLength": 255 },
           "description": { "type": "string", "maxLength": 5000 },
           "unit_type": {
@@ -177,6 +185,53 @@
         "properties": {
           "error": { "type": "string" },
           "message": { "type": "string" }
+        }
+      },
+      "FoodDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string", "nullable": true },
+          "gtin": { 
+            "type": "string", 
+            "pattern": "^[0-9]{8,14}$", 
+            "nullable": true 
+          },
+          "category": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "unit_type": { "type": "string", "nullable": true },
+          "quantity": { "type": "integer", "nullable": true },
+          "portion_count": { "type": "integer", "nullable": true },
+          "expiration_after_opening": { "type": "integer", "nullable": true },
+          "nutrients_per_item": { "type": "boolean", "nullable": true },
+          "calories": { "type": "number", "nullable": true },
+          "fats": { "type": "number", "nullable": true },
+          "saturated": { "type": "number", "nullable": true },
+          "carbs": { "type": "number", "nullable": true },
+          "sugars": { "type": "number", "nullable": true },
+          "protein": { "type": "number", "nullable": true },
+          "fiber": { "type": "number", "nullable": true },
+          "sodium": { "type": "number", "nullable": true }
+        },
+        "example": {
+          "id": 5827,
+          "name": "Apple",
+          "gtin": null,
+          "category": "Fruits",
+          "description": null,
+          "unit_type": "items",
+          "quantity": 1,
+          "portion_count": null,
+          "expiration_after_opening": null,
+          "nutrients_per_item": true,
+          "calories": 95.0,
+          "fats": null,
+          "saturated": null,
+          "carbs": 25.0,
+          "sugars": 19.0,
+          "protein": 0.5,
+          "fiber": null,
+          "sodium": null
         }
       }
     }
@@ -402,6 +457,56 @@
       }
     },
     "/food/id/{id}": {
+      "get": {
+        "summary": "Get food entry by ID",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Product ID of the food entry to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food entry retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FoodDetailResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid product ID",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Food entry not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      },
       "patch": {
         "summary": "Update food entry",
         "security": [{ "BearerAuth": [] }],
@@ -475,6 +580,185 @@
             }
           }
         }
+      }
+    },
+    "/food/gtin/{gtin}": {
+      "get": {
+        "summary": "Get food entry by GTIN",
+        "security": [],
+        "parameters": [
+          {
+            "name": "gtin",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{1,14}$"
+            },
+            "description": "Product GTIN of the food entry to retrieve"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food entry retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FoodDetailResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid product GTIN",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "404": {
+            "description": "Food entry not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/foods/name/{name}": {
+      "get": {
+        "summary": "Search food entries by name (partial matching)",
+        "description": "Search for food entries where the name contains the search term. Uses fuzzy matching to find partial matches and handle typos.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 1
+            },
+            "description": "Search term to find in food names. Supports partial matching (e.g., 'apple' finds 'Apple Juice', 'Pineapple')",
+            "example": "apple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Food entries found successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "foods": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/FoodDetailResponse"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Number of food entries found"
+                    }
+                  },
+                  "example": {
+                    "foods": [
+                      {
+                        "id": 1,
+                        "name": "Apple",
+                        "gtin": "1234567890123",
+                        "category": "Fruits",
+                        "description": "Fresh red apple",
+                        "unit_type": "items",
+                        "quantity": 1,
+                        "portion_count": 1,
+                        "expiration_after_opening": null,
+                        "nutrients_per_item": true,
+                        "calories": 95.0,
+                        "fats": 0.3,
+                        "saturated": 0.1,
+                        "carbs": 25.0,
+                        "sugars": 19.0,
+                        "protein": 0.5,
+                        "fiber": 4.0,
+                        "sodium": 2.0
+                      },
+                      {
+                        "id": 15,
+                        "name": "Apple Juice",
+                        "gtin": "9876543210987",
+                        "category": "Beverages",
+                        "description": "100% pure apple juice",
+                        "unit_type": "ml",
+                        "quantity": 1000,
+                        "portion_count": 4,
+                        "expiration_after_opening": 3,
+                        "nutrients_per_item": false,
+                        "calories": 46.0,
+                        "fats": 0.1,
+                        "saturated": 0.0,
+                        "carbs": 11.0,
+                        "sugars": 10.0,
+                        "protein": 0.1,
+                        "fiber": 0.2,
+                        "sodium": 4.0
+                      }
+                    ],
+                    "count": 2
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - Invalid search term",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "examples": {
+                  "empty_name": {
+                    "summary": "Empty search term",
+                    "value": {
+                      "error": "Invalid food name",
+                      "message": "Search term cannot be empty"
+                    }
+                  },
+                  "name_too_long": {
+                    "summary": "Search term too long",
+                    "value": {
+                      "error": "Invalid food name",
+                      "message": "Search term cannot exceed 255 characters"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": ["Food Registry"]
       }
     }
   }

@@ -165,14 +165,17 @@ func (q *Queries) GetFoodEntriesByCategory(ctx context.Context, category pgtype.
 	return items, nil
 }
 
-const getFoodEntriesByName = `-- name: GetFoodEntriesByName :many
+const getFoodEntriesByNameContains = `-- name: GetFoodEntriesByNameContains :many
 SELECT product_id, name, gtin, category, description, unit_type, quantity, portion_count, expiration_after_opening, nutrients_per_item, calories, fats, saturated, carbs, sugars, protein, fiber, sodium, created_at, updated_at, created_by, updated_by
 FROM food_registry
-WHERE name = $1
+WHERE LOWER(name) LIKE LOWER('%' || $1 || '%')
+OR similarity(LOWER(name), LOWER($1)) > 0.4
+ORDER BY similarity(LOWER(name), LOWER($1)) DESC, LENGTH(name), name
+LIMIT 50
 `
 
-func (q *Queries) GetFoodEntriesByName(ctx context.Context, name pgtype.Text) ([]FoodRegistry, error) {
-	rows, err := q.db.Query(ctx, getFoodEntriesByName, name)
+func (q *Queries) GetFoodEntriesByNameContains(ctx context.Context, dollar_1 pgtype.Text) ([]FoodRegistry, error) {
+	rows, err := q.db.Query(ctx, getFoodEntriesByNameContains, dollar_1)
 	if err != nil {
 		return nil, err
 	}
