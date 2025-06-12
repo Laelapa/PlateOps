@@ -1,0 +1,36 @@
+PlateOps
+Copyright 2025 Demetrius Papas
+
+https://github.com/Laelapa/PlateOps
+
+===================================
+
+This project has the following direct and indirect dependencies:
+
+github.com/Laelapa/GoHome/logging,https://github.com/Laelapa/GoHome/blob/v0.1.2/LICENSE,Apache-2.0
+github.com/gabriel-vasile/mimetype,https://github.com/gabriel-vasile/mimetype/blob/v1.4.8/LICENSE,MIT
+github.com/go-playground/locales,https://github.com/go-playground/locales/blob/v0.14.1/LICENSE,MIT
+github.com/go-playground/universal-translator,https://github.com/go-playground/universal-translator/blob/v0.18.1/LICENSE,MIT
+github.com/go-playground/validator/v10,https://github.com/go-playground/validator/blob/v10.26.0/LICENSE,MIT
+github.com/golang-jwt/jwt/v5,https://github.com/golang-jwt/jwt/blob/v5.2.2/LICENSE,MIT
+github.com/google/uuid,https://github.com/google/uuid/blob/v1.6.0/LICENSE,BSD-3-Clause
+github.com/jackc/pgpassfile,https://github.com/jackc/pgpassfile/blob/v1.0.0/LICENSE,MIT
+github.com/jackc/pgservicefile,https://github.com/jackc/pgservicefile/blob/5a60cdf6a761/LICENSE,MIT
+github.com/jackc/pgx/v5,https://github.com/jackc/pgx/blob/v5.7.5/LICENSE,MIT
+github.com/jackc/puddle/v2,https://github.com/jackc/puddle/blob/v2.2.2/LICENSE,MIT
+github.com/joho/godotenv,https://github.com/joho/godotenv/blob/v1.5.1/LICENCE,MIT
+github.com/klauspost/compress,https://github.com/klauspost/compress/blob/v1.18.0/LICENSE,Apache-2.0
+github.com/klauspost/compress/internal/snapref,https://github.com/klauspost/compress/blob/v1.18.0/internal/snapref/LICENSE,BSD-3-Clause
+github.com/klauspost/compress/s2,https://github.com/klauspost/compress/blob/v1.18.0/s2/LICENSE,BSD-3-Clause
+github.com/klauspost/compress/zstd/internal/xxhash,https://github.com/klauspost/compress/blob/v1.18.0/zstd/internal/xxhash/LICENSE.txt,MIT
+github.com/leodido/go-urn,https://github.com/leodido/go-urn/blob/v1.4.0/LICENSE,MIT
+github.com/pierrec/lz4/v4,https://github.com/pierrec/lz4/blob/v4.1.22/LICENSE,BSD-3-Clause
+github.com/twmb/franz-go/pkg,https://github.com/twmb/franz-go/blob/v1.19.5/LICENSE,BSD-3-Clause
+github.com/twmb/franz-go/pkg/kmsg,https://github.com/twmb/franz-go/blob/pkg/kmsg/v1.11.2/pkg/kmsg/LICENSE,BSD-3-Clause
+go.uber.org/multierr,https://github.com/uber-go/multierr/blob/v1.11.0/LICENSE.txt,MIT
+go.uber.org/zap,https://github.com/uber-go/zap/blob/v1.27.0/LICENSE,MIT
+golang.org/x/crypto,https://cs.opensource.google/go/x/crypto/+/v0.38.0:LICENSE,BSD-3-Clause
+golang.org/x/net/html,https://cs.opensource.google/go/x/net/+/v0.38.0:LICENSE,BSD-3-Clause
+golang.org/x/sync/semaphore,https://cs.opensource.google/go/x/sync/+/v0.14.0:LICENSE,BSD-3-Clause
+golang.org/x/sys/cpu,https://cs.opensource.google/go/x/sys/+/v0.33.0:LICENSE,BSD-3-Clause
+golang.org/x/text,https://cs.opensource.google/go/x/text/+/v0.25.0:LICENSE,BSD-3-Clause
