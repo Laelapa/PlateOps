@@ -10,7 +10,9 @@ RUN CGO_ENABLED=0 go build -v -o /plateops ./cmd/api
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
 RUN adduser -D -s /bin/sh appuser
+RUN mkdir -p /docs
 COPY --from=builder /plateops /usr/local/bin/
+COPY --from=builder /usr/src/app/docs/openapi.json /docs/openapi.json
 USER appuser
 EXPOSE 8080
 
