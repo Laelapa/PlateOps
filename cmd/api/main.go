@@ -87,13 +87,13 @@ func run() error {
 		return fmt.Errorf("database initialization failed: %w", err)
 	}
 	defer dbPool.Close()
-	logger.LogAppInfo("Database connection pool created", zap.String("db_url", os.Getenv("DB_URL")))
+	logger.LogAppInfo("Database connection pool created")
 
 	// Verify database connection
 	if dbPingErr := dbPool.Ping(ctx); dbPingErr != nil {
 		return fmt.Errorf("database connection check failed: %w", dbPingErr)
 	}
-	logger.LogAppInfo("Database connection alive", zap.String("db_url", os.Getenv("DB_URL")))
+	logger.LogAppInfo("Database connection alive")
 
 	queries := repository.New(dbPool)
 

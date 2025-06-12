@@ -7,8 +7,8 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8080",
-      "description": "Development server"
+      "url": "https://plateops.fly.dev",
+      "description": "Server under iterative development"
     }
   ],
   "components": {
