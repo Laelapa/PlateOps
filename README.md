@@ -2,8 +2,9 @@
 
 <img align="right" width="320" src="PlateOpsMascot.png">
 
-PlateOps is a registry of known foods & recipes, and a food stock management and daily nutrition tracking service. It provides an API with user authentication and it is built to serve as a backend for consumer-facing applications.
+PlateOps is a comprehensive food management platform that provides a searchable registry of foods and recipes, inventory tracking and nutrition monitoring, and user authentication. Built as a robust backend API, PlateOps empowers developers to create food-focused applications while providing users with powerful tools to manage their pantry, track their nutritional intake, and get recipe suggestions based on their available food stocks and their macronutrient goals for the day, while prioritizing ingredients that are nearing their expiration date - minimizing spoilage and waste.
 
+Whether you're building a meal planning app, a grocery management tool, a nutrition tracker, or a solution that leverages all of those, PlateOps provides the foundation.
 
 ---
 
@@ -40,7 +41,7 @@ PlateOps is a registry of known foods & recipes, and a food stock management and
 
 - **Inventory Management \***
   - Track owned food items, quantities, and expiration dates.
-  - Track package opening and usage to monitor freshness.
+  - Track packaging opening to monitor freshness.
 
 - **Recipe Knowledge Base \***
   - Create and manage recipes with flexible ingredient lists.
@@ -49,7 +50,7 @@ PlateOps is a registry of known foods & recipes, and a food stock management and
 - **Role Management \***
   - Basic role support (`user`, `admin`, `limited`) for future access control expansions.
 
-\* *Migrations and queries implemented, endpoints soon*
+\* *Migrations and queries implemented, endpoints and business logic soon*
 
 
 ---
