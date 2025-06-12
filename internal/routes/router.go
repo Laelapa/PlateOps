@@ -3,6 +3,8 @@ package routes
 import (
 	"net/http"
 
+	"github.com/twmb/franz-go/pkg/kgo"
+
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/middleware"
 	"github.com/Laelapa/PlateOps/internal/repository"
@@ -21,12 +23,13 @@ func Setup(
 	logger *logging.Logger,
 	queries *repository.Queries,
 	tokenAuthority *tokenauthority.TokenAuthority,
+	kafkaClient *kgo.Client,
 ) *http.ServeMux {
 
 	mux := http.NewServeMux()
 	fileServer := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
 
-	h := handlers.New(logger, queries, tokenAuthority)
+	h := handlers.New(logger, queries, tokenAuthority, kafkaClient)
 
 	// to simplify the mux.Handle parameters for authenticated routes
 	withAuth := func(handler func(http.ResponseWriter, *http.Request)) http.Handler {

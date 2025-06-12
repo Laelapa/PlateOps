@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
@@ -17,7 +18,7 @@ import (
 
 	"github.com/Laelapa/GoHome/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
+	"github.com/twmb/franz-go/pkg/kgo"
 	"go.uber.org/zap"
 
 	_ "github.com/jackc/pgx/v5"
@@ -60,11 +61,11 @@ func run() error {
 	// Disabled for production, use your service's secrets instead
 	// Refer to the dotenv example file for the required environment variables
 	// Uncomment the following lines to load environment variables from a .env file in a local development environment
-
-	err := godotenv.Load()
-	if err != nil {
-		return fmt.Errorf("error loading .env file: %w", err)
-	}
+	//
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	return fmt.Errorf("error loading .env file: %w", err)
+	// }
 
 	// TODO: More configurable init based on .env options / Integrate viper
 
@@ -72,6 +73,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("error creating logger: %w", err) // FIXME: add error handling
 	}
+	logger.LogAppInfo("Logger initialized", zap.String("environment", os.Getenv("ENVIRONMENT")))
 
 	defer func() {
 		if syncErr := logger.Sync(); syncErr != nil { // FIXME: handle case of writing to unbuffered output that doesnt support sync
@@ -85,11 +87,13 @@ func run() error {
 		return fmt.Errorf("database initialization failed: %w", err)
 	}
 	defer dbPool.Close()
+	logger.LogAppInfo("Database connection pool created", zap.String("db_url", os.Getenv("DB_URL")))
 
 	// Verify database connection
 	if dbPingErr := dbPool.Ping(ctx); dbPingErr != nil {
 		return fmt.Errorf("database connection check failed: %w", dbPingErr)
 	}
+	logger.LogAppInfo("Database connection alive", zap.String("db_url", os.Getenv("DB_URL")))
 
 	queries := repository.New(dbPool)
 
@@ -103,6 +107,21 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("error creating token authority: %w", err)
 	}
+	logger.LogAppInfo("Token authority initialized")
+
+	var kafkaClient *kgo.Client // nil
+	kafkaBrokers := os.Getenv("KAFKA_BROKERS")
+	if kafkaBrokers != "" {
+		client, kErr := kgo.NewClient(
+			kgo.SeedBrokers(strings.Split(kafkaBrokers, ",")...),
+			kgo.ClientID(os.Getenv("SERVICE_NAME")),
+		)
+		if kErr != nil {
+			return fmt.Errorf("error creating Kafka client: %w", kErr)
+		}
+		logger.LogAppInfo("Kafka client created", zap.String("brokers", kafkaBrokers))
+		kafkaClient = client
+	} // If Kafka is not configured, kafkaClient remains nil
 
 	// Parse the server shutdown timeout from the environment
 	shutdownTimeout, err := time.ParseDuration(os.Getenv("SERVER_SHUTDOWN_TIMEOUT") + "s")
@@ -119,6 +138,7 @@ func run() error {
 		logger,
 		queries,
 		tokenAuthority,
+		kafkaClient,
 		os.Getenv("SERVER_PORT"),
 		os.Getenv("STATIC_DIR"), // FIXME: check if this is a valid path
 		shutdownTimeout,
