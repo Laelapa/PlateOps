@@ -453,7 +453,8 @@
               }
             }
           }
-        }
+        },
+        "tags": ["Food Registry"]
       }
     },
     "/food/id/{id}": {
@@ -505,7 +506,8 @@
               }
             }
           }
-        }
+        },
+        "tags": ["Food Registry"]
       },
       "patch": {
         "summary": "Update food entry",
@@ -579,7 +581,8 @@
               }
             }
           }
-        }
+        },
+        "tags": ["Food Registry"]
       }
     },
     "/food/gtin/{gtin}": {
@@ -631,7 +634,8 @@
               }
             }
           }
-        }
+        },
+        "tags": ["Food Registry"]
       }
     },
     "/foods/name/{name}": {
