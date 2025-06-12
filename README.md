@@ -109,18 +109,18 @@ docs/                    # OpenAPI schema & documentation
 
 PlateOps exposes a RESTful API. The core endpoints include:
 
-- `POST /signup` — Register a new user.
-- `POST /login` — Authenticate and receive JWT/refresh tokens.
-- `POST /refresh` — Exchange a refresh token for a new JWT.
-- `POST /logout` — Invalidate a refresh token.
-- `POST /food` — Create a new food entry (JWT required).
-- `GET /food/id/{id}` — Retrieve a food entry by internal ID.
-- `GET /food/gtin/{gtin}` — Retrieve a food entry by GTIN.
-- `PATCH /food/id/{id}` — Update an existing food entry (JWT required).
-- `GET /foods/name/{name}` — Fuzzy search foods by name.
-- `GET /health` — Health check endpoint.
-- `GET /openapi.json` — OpenAPI schema.
-- `GET /docs` — Swagger UI.
+- `POST /signup`: Register a new user.
+- `POST /login`: Authenticate and receive JWT/refresh tokens.
+- `POST /refresh`: Exchange a refresh token for a new JWT.
+- `POST /logout`: Invalidate a refresh token.
+- `POST /food`: Create a new food entry (JWT required).
+- `GET /food/id/{id}`: Retrieve a food entry by internal ID.
+- `GET /food/gtin/{gtin}`: Retrieve a food entry by GTIN.
+- `PATCH /food/id/{id}`: Update an existing food entry (JWT required).
+- `GET /foods/name/{name}`: Fuzzy search foods by name.
+- `GET /health`: Health check endpoint.
+- `GET /openapi.json`: OpenAPI schema.
+- `GET /docs`: Swagger UI.
 
 See the [OpenAPI spec](docs/openapi.json) for request and response details.
 
@@ -192,3 +192,5 @@ or you can build a ready for deployment docker image through the provided `Docke
 - **Contributions**: Please open issues, discussions, or PRs to discuss features, bugs, or improvements.
 
 ---
+
+*The gopher mascot is a derivative work based on the Go gopher by Renee French (https://reneefrench.blogspot.com/) which carries the Creative Commons 4.0 Attributions license*
