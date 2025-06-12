@@ -1,13 +1,13 @@
 #  PlateOps
 
-<img align="left" width="320" src="PlateOpsMascot.png">
+<img align="right" width="320" src="PlateOpsMascot.png">
 
 PlateOps is a registry of known foods & recipes, and a food stock management and daily nutrition tracking service. It provides an API with user authentication and it is built to serve as a backend for consumer-facing applications.
 
 
 ---
 
-## Table of Contents
+### Table of Contents
 
 - [Features](#features)
 - [Technical Highlights](#technical-highlights)
