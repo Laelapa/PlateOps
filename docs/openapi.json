@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "PlateOps API",
-    "version": "1.0.0",
+    "version": "0.0.0-dev",
     "description": "Food management and nutrition API"
   },
   "servers": [
