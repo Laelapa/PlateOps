@@ -155,11 +155,14 @@ Key variables include:
 
 Apply database migrations with [goose](https://github.com/pressly/goose):
 
-*If you have set up the goose environment variables, otherwise define information in args.*
+*If you have set up the goose environment variables,*
 ```sh
 goose up
 ```
-
+ *otherwise define information in args.*
+ ```sh
+goose -dir ./internal/migrations postgres "postgresql://postgres:yourpassword@yourdbhost:5432/plateopsdb" up
+```
 
 ### Running
 
@@ -169,7 +172,7 @@ You can compile and run the Go code normally:
 go run ./cmd/api
 ```
 
-or you can build a ready for deployment docker image through the provided `Dockerfile`.
+or you can use the provided `Dockerfile` to build an alpine-based docker image ready for deployment.
 
 ---
 
@@ -182,13 +185,16 @@ or you can build a ready for deployment docker image through the provided `Docke
 - All endpoints validate input rigorously to prevent injection and malformed data.
 - Database schema uses foreign keys and check constraints for referential integrity.
 
+>[!IMPORTANT]
+>**Fly.io**: The project is currently configured for deployment on [fly.io](https://fly.io) and utilizes platform-specific headers like [`Fly-Client-IP`](https://fly.io/docs/networking/request-headers/#fly-client-ip). For deployments elsewhere this needs to be taken into consideration, as at best they won't be set and at worst they could be spoofed by users.
+
 ---
 
 ## Development Notes
 
 - **Tests**: (To be expanded) Unit and integration tests are planned for all major components.
-- **Error Handling**: All errors are logged; user-facing errors avoid broadcasting sensitive details.
-- **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints in code, synergistic microservices through pub/sub and api, or external integrations such as front-ends to the api.
+- **Error Handling**: All errors are logged; user-facing errors don't broadcast sensitive details.
+- **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints in the code, synergistic microservices via pub/sub and API, or attaching external integrations such as front-ends to the API.
 - **Contributions**: Please open issues, discussions, or PRs to discuss features, bugs, or improvements.
 
 ---
