@@ -48,7 +48,7 @@ PlateOps is a comprehensive food management platform that provides a searchable 
 - **Role Management \***
   - Basic role support (`user`, `admin`, `limited`) for future access control expansions.
 
-\* *Migrations and queries implemented, endpoints and business logic soon*
+\* *Migrations and queries implemented, endpoints and business logic are in the oven*
 
 
 ---
