@@ -2,9 +2,7 @@
 
 <img align="right" width="320" src="PlateOpsMascot.png">
 
-PlateOps is a comprehensive food management platform that provides a searchable registry of foods and recipes, inventory tracking and nutrition monitoring, and user authentication. Built as a robust backend API, PlateOps empowers developers to create food-focused applications while providing users with powerful tools to manage their pantry, track their nutritional intake, and get recipe suggestions based on their available food stocks and their macronutrient goals for the day, while prioritizing ingredients that are nearing their expiration date - minimizing spoilage and waste.
-
-Whether you're building a meal planning app, a grocery management tool, a nutrition tracker, or a solution that leverages all of those, PlateOps provides the foundation.
+PlateOps is a comprehensive food management platform that provides a searchable registry of foods and recipes, inventory tracking, nutrition monitoring, and user authentication. Built as a robust backend API, PlateOps empowers developers to create food-focused applications while providing users with powerful tools to manage their pantry, track their nutritional intake, and receive recipe suggestions. The platform intelligently recommends recipes based on food stocks, the users' macronutrient goals for the day, and ingredient expiration dates minimizing food spoilage and waste.
 
 ---
 
