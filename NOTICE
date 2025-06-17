@@ -34,3 +34,5 @@ golang.org/x/net/html,https://cs.opensource.google/go/x/net/+/v0.38.0:LICENSE,BS
 golang.org/x/sync/semaphore,https://cs.opensource.google/go/x/sync/+/v0.14.0:LICENSE,BSD-3-Clause
 golang.org/x/sys/cpu,https://cs.opensource.google/go/x/sys/+/v0.33.0:LICENSE,BSD-3-Clause
 golang.org/x/text,https://cs.opensource.google/go/x/text/+/v0.25.0:LICENSE,BSD-3-Clause
+
+The gopher mascot is a derivative work based on the Go gopher by Renee French (https://reneefrench.blogspot.com/) which carries the Creative Commons 4.0 Attributions license

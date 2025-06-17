@@ -2,8 +2,7 @@
 
 <img align="right" width="320" src="PlateOpsMascot.png">
 
-PlateOps is a registry of known foods & recipes, and a food stock management and daily nutrition tracking service. It provides an API with user authentication and it is built to serve as a backend for consumer-facing applications.
-
+PlateOps is a comprehensive food management platform that provides a searchable registry of foods and recipes, inventory tracking, nutrition monitoring, and user authentication. Built as a robust backend API, PlateOps empowers developers to create food-focused applications while enabling users to manage their pantry, track their nutritional intake, and receive recipe suggestions. The platform recommends recipes based on food stocks, the users' macronutrient goals for the day, and ingredient expiration dates minimizing food spoilage and waste.
 
 ---
 
@@ -40,7 +39,7 @@ PlateOps is a registry of known foods & recipes, and a food stock management and
 
 - **Inventory Management \***
   - Track owned food items, quantities, and expiration dates.
-  - Track package opening and usage to monitor freshness.
+  - Track packaging opening to monitor freshness.
 
 - **Recipe Knowledge Base \***
   - Create and manage recipes with flexible ingredient lists.
@@ -49,7 +48,7 @@ PlateOps is a registry of known foods & recipes, and a food stock management and
 - **Role Management \***
   - Basic role support (`user`, `admin`, `limited`) for future access control expansions.
 
-\* *Migrations and queries implemented, endpoints soon*
+\* *Migrations and queries implemented, endpoints and business logic are in the oven*
 
 
 ---
@@ -108,18 +107,18 @@ docs/                    # OpenAPI schema & documentation
 
 PlateOps exposes a RESTful API. The core endpoints include:
 
-- `POST /signup` — Register a new user.
-- `POST /login` — Authenticate and receive JWT/refresh tokens.
-- `POST /refresh` — Exchange a refresh token for a new JWT.
-- `POST /logout` — Invalidate a refresh token.
-- `POST /food` — Create a new food entry (JWT required).
-- `GET /food/id/{id}` — Retrieve a food entry by internal ID.
-- `GET /food/gtin/{gtin}` — Retrieve a food entry by GTIN.
-- `PATCH /food/id/{id}` — Update an existing food entry (JWT required).
-- `GET /foods/name/{name}` — Fuzzy search foods by name.
-- `GET /health` — Health check endpoint.
-- `GET /openapi.json` — OpenAPI schema.
-- `GET /docs` — Swagger UI.
+- `POST /signup`: Register a new user.
+- `POST /login`: Authenticate and receive JWT/refresh tokens.
+- `POST /refresh`: Exchange a refresh token for a new JWT.
+- `POST /logout`: Invalidate a refresh token.
+- `POST /food`: Create a new food entry (JWT required).
+- `GET /food/id/{id}`: Retrieve a food entry by internal ID.
+- `GET /food/gtin/{gtin}`: Retrieve a food entry by GTIN.
+- `PATCH /food/id/{id}`: Update an existing food entry (JWT required).
+- `GET /foods/name/{name}`: Fuzzy search foods by name.
+- `GET /health`: Health check endpoint.
+- `GET /openapi.json`: OpenAPI schema.
+- `GET /docs`: Swagger UI.
 
 See the [OpenAPI spec](docs/openapi.json) for request and response details.
 
@@ -154,11 +153,14 @@ Key variables include:
 
 Apply database migrations with [goose](https://github.com/pressly/goose):
 
-*If you have set up the goose environment variables, otherwise define information in args.*
+*If you have set up the goose environment variables,*
 ```sh
 goose up
 ```
-
+ *otherwise define information in args.*
+ ```sh
+goose -dir ./internal/migrations postgres "postgresql://postgres:yourpassword@yourdbhost:5432/plateopsdb" up
+```
 
 ### Running
 
@@ -168,7 +170,7 @@ You can compile and run the Go code normally:
 go run ./cmd/api
 ```
 
-or you can build a ready for deployment docker image through the provided `Dockerfile`.
+or you can use the provided `Dockerfile` to build an alpine-based docker image ready for deployment.
 
 ---
 
@@ -181,13 +183,18 @@ or you can build a ready for deployment docker image through the provided `Docke
 - All endpoints validate input rigorously to prevent injection and malformed data.
 - Database schema uses foreign keys and check constraints for referential integrity.
 
+>[!IMPORTANT]
+>**Fly.io**: The project is currently configured for deployment on [fly.io](https://fly.io) and utilizes platform-specific headers like [`Fly-Client-IP`](https://fly.io/docs/networking/request-headers/#fly-client-ip). For deployments elsewhere this needs to be taken into consideration, as at best they won't be set and at worst they could be spoofed by users.
+
 ---
 
 ## Development Notes
 
 - **Tests**: (To be expanded) Unit and integration tests are planned for all major components.
-- **Error Handling**: All errors are logged; user-facing errors avoid broadcasting sensitive details.
-- **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints in code, synergistic microservices through pub/sub and api, or external integrations such as front-ends to the api.
+- **Error Handling**: All errors are logged; user-facing errors don't broadcast sensitive details.
+- **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints in the code, synergistic microservices via pub/sub and API, or attaching external integrations such as front-ends to the API.
 - **Contributions**: Please open issues, discussions, or PRs to discuss features, bugs, or improvements.
 
 ---
+
+*The gopher mascot is a derivative work based on the Go gopher by Renee French (https://reneefrench.blogspot.com/) which carries the Creative Commons 4.0 Attributions license*
