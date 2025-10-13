@@ -14,6 +14,7 @@ import (
 
 	"github.com/Laelapa/PlateOps/auth/tokenauthority"
 	"github.com/Laelapa/PlateOps/internal/app"
+	"github.com/Laelapa/PlateOps/internal/env"
 	"github.com/Laelapa/PlateOps/internal/repository"
 
 	"github.com/Laelapa/GoHome/logging"
@@ -26,7 +27,6 @@ import (
 
 const (
 	defaultShutdownTimeout = 5 * time.Second // Until forceful shutdown
-	jwtLifetime            = 3 * time.Hour   // Lifetime of the JWT token
 	// TODO: make jwtLifetime configurable (possibly by environment:
 	// hours/days for dev | minutes for live)
 	rtLifetime    = 7 * 24 * time.Hour // (7 days) Lifetime of the refresh token
@@ -87,22 +87,22 @@ func run() error {
 		return fmt.Errorf("database initialization failed: %w", err)
 	}
 	defer dbPool.Close()
-	logger.LogAppInfo("Database connection pool created", zap.String("db_url", os.Getenv("DB_URL")))
+	logger.LogAppInfo("Database connection pool created")
 
 	// Verify database connection
 	if dbPingErr := dbPool.Ping(ctx); dbPingErr != nil {
 		return fmt.Errorf("database connection check failed: %w", dbPingErr)
 	}
-	logger.LogAppInfo("Database connection alive", zap.String("db_url", os.Getenv("DB_URL")))
+	logger.LogAppInfo("Database connection alive")
 
 	queries := repository.New(dbPool)
 
 	tokenAuthority, err := tokenauthority.New(
 		os.Getenv("JWT_SECRET"),
 		os.Getenv("SERVICE_NAME"),
-		jwtLifetime,
+		env.ParseLifetimeJWT(os.Getenv("JWT_LIFETIME"), logger),
 		rtSizeInBytes,
-		rtLifetime,
+		env.ParseLifetimeRT(os.Getenv("RT_LIFETIME"), logger),
 	)
 	if err != nil {
 		return fmt.Errorf("error creating token authority: %w", err)
