@@ -64,7 +64,7 @@ Whenever I come across anything interesting during the development process I wri
 
 - **Structure & Extensibility**
   - Composable Middleware: Security, logging, and cache headers are applied via middleware.
-  - Kafka Integration: Events like food updates and user signups can be published to Kafka for downstream consumers.
+  - Kafka Integration: Events like food updates can be published to Kafka for downstream consumers.
   - Modular Design: Clean package boundaries for authentication, database, middleware, and routing.
 
 - **Inventory Management \***
@@ -119,9 +119,60 @@ PlateOps exposes a RESTful API. The core endpoints include:
 
 See the [OpenAPI spec](docs/openapi.json) for request and response details.
 
----
 
-## Getting Started
+## Quick Start Setup for Local Development & Execution
+
+### Prerequisites
+
+- **Docker** and **Docker Compose**: **required**
+- **Go**: *optional*, needed only if you want to run the API outside Docker
+- **sqlc**: *optional*, only needed if modifying database queries
+- **goose**: *optional*, only needed if running migrations manually outside Docker
+
+### Running Locally
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Laelapa/PlateOps.git
+   cd PlateOps
+   ```
+
+2. **Start the development environment:**
+   ```bash
+   docker compose up
+   ```
+
+That's it! The environment includes:
+- PostgreSQL with automatic migrations
+- Kafka with pre-created topics
+- PlateOps API ready to use
+
+Access Points:
+- Access the API at: `http://localhost:8081`
+- View API docs at: `http://localhost:8081/docs`
+- Monitor Kafka at: `http://localhost:8080`
+
+### Modifying the Project
+
+**If you're adding/modifying SQL queries:**
+```bash
+# Install sqlc
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+# Edit queries in internal/queries/
+# Then regenerate Go code:
+sqlc generate
+```
+
+**If you're creating new migrations:**
+```bash
+# Install goose
+go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Create a new migration:
+goose -dir ./internal/migrations create my_migration sql
+```
+
 
 ### Prerequisites
 

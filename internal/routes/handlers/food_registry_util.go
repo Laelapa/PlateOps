@@ -135,7 +135,7 @@ func (h *Handler) publishFoodPatchEvent(ctx context.Context, productID int32) {
 	}
 
 	record := &kgo.Record{
-		Topic: "food.updates",
+		Topic: "food.updates", // TODO: env it
 		Value: eventBytes,
 	}
 

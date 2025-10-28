@@ -1,0 +1,147 @@
+# This compose file sets up an environment for local development
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: plateops-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-plateops}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-plateops_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-plateopsdb}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-plateops}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - plateops-network
+
+  migrations:
+    image: golang:bookworm
+    container_name: plateops-migrations
+    working_dir: /app
+    volumes:
+      - ./internal/migrations:/app/migrations:ro
+    environment:
+      GOOSE_DRIVER: ${GOOSE_DRIVER:-postgres}
+      GOOSE_DBSTRING: postgres://${POSTGRES_USER:-plateops}:${POSTGRES_PASSWORD:-plateops_dev_password}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-plateopsdb}?sslmode=disable
+    command: >
+      sh -c "
+        echo 'Installing goose...' &&
+        go install github.com/pressly/goose/v3/cmd/goose@latest &&
+        goose -dir /app/migrations postgres \"$$GOOSE_DBSTRING\" up
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - plateops-network
+    restart: "no"
+
+  kafka:
+    image: bitnamilegacy/kafka:latest
+    container_name: plateops-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      CLUSTER_ID: plateops-kafka-cluster
+      KAFKA_HEAP_OPTS: "-Xmx512M -Xms256M"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/tmp/kraft-combined-logs
+    healthcheck:
+      test: 
+        - "CMD-SHELL"
+        - |
+          kafka-broker-api-versions.sh --bootstrap-server localhost:9092 --timeout 15000 > /dev/null 2>&1 || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - plateops-network
+
+  # TODO: topic food.updates should be env-ed   
+  kafka-init:
+    image: bitnamilegacy/kafka:latest
+    container_name: plateops-kafka-init
+    command: >
+      sh -c "
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic food.updates --partitions 3 --replication-factor 1 &&
+        kafka-topics.sh --bootstrap-server kafka:9092 --list
+      "
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - plateops-network
+    restart: "no"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: plateops-kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ${KAFKA_CLUSTER_NAME:-plateops-cluster}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: 'true'
+    ports:
+      - "8080:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - plateops-network
+
+  plateops-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: plateops-api
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DB_URL: postgres://${POSTGRES_USER:-plateops}:${POSTGRES_PASSWORD:-plateops_dev_password}@postgres:${POSTGRES_PORT:-5432}/${POSTGRES_DB:-plateopsdb}?sslmode=disable
+      KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_change_in_production_min_32_chars}
+      JWT_LIFETIME: ${JWT_LIFETIME:-3h}
+      RT_LIFETIME: ${RT_LIFETIME:-168h}
+      SERVICE_NAME: ${SERVICE_NAME:-PlateOpsDev}
+      SERVER_PORT: ${SERVER_PORT:-8081}
+      STATIC_DIR: ${STATIC_DIR:-/app/static}
+      SERVER_SHUTDOWN_TIMEOUT: ${SERVER_SHUTDOWN_TIMEOUT:-5}
+    ports:
+      - "${SERVER_PORT:-8081}:${SERVER_PORT:-8081}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
+      kafka-init:
+        condition: service_completed_successfully
+    networks:
+      - plateops-network
+
+volumes:
+  postgres_data:
+  kafka_data:
+
+networks:
+  plateops-network:
+    driver: bridge
