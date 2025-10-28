@@ -1,5 +1,7 @@
 #  PlateOps
 
+[![CodeFactor](https://www.codefactor.io/repository/github/laelapa/plateops/badge)](https://www.codefactor.io/repository/github/laelapa/plateops) [![Go Report Card](https://goreportcard.com/badge/github.com/Laelapa/PlateOps)](https://goreportcard.com/report/github.com/Laelapa/PlateOps)
+
 <img align="right" width="320" src="PlateOpsMascot.png">
 
 PlateOps is a comprehensive diet management platform. Currently it provides: 
