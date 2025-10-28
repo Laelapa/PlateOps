@@ -174,19 +174,13 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 # Create a new migration:
 goose -dir ./internal/migrations create my_migration sql
 ```
+## For Online Deployment
 
-
-### Prerequisites
-
-- Go
-- [goose](https://github.com/pressly/goose)
-- [sqlc](https://sqlc.dev/) (optional, if extending/modifying/regenerating queries is needed)
-- PostgreSQL
-- Kafka/Redpanda (optional, for event streaming)
-- Docker (optional, for containerized deployment)
+If you are planning to deploy the application online via the Dockerfile (remember: the Compose file is suggested for local deployment only) consider the following:
 
 ### Environment Variables
 
+If you are planning to deploy it online you should set environment variables.
 See the `dotenv.example` file for required configuration (documentation in the github wiki pages is a work-in-progress).
 Key variables include:
 
@@ -198,31 +192,6 @@ Key variables include:
 - `SERVER_PORT` — Port to bind the API server.
 - `STATIC_DIR` — Directory for static file (i.e favicon) serving (default: `static/`).
 - `KAFKA_BROKERS` — (optional) Comma-separated Kafka broker URLs.
-
-### Migrations
-
-Apply database migrations with [goose](https://github.com/pressly/goose):
-
-*If you have set up the goose environment variables,*
-```sh
-goose up
-```
- *otherwise define information in args.*
- ```sh
-goose -dir ./internal/migrations postgres "postgresql://postgres:yourpassword@yourdbhost:5432/plateopsdb" up
-```
-
-### Running
-
-You can compile and run the Go code normally:
-
-```sh
-go run ./cmd/api
-```
-
-or you can use the provided `Dockerfile` to build an alpine-based docker image ready for deployment.
-
----
 
 ## Security Considerations
 
