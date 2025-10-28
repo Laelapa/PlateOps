@@ -21,19 +21,6 @@ In its final version it will enable users to manage their pantry/inventory, trac
 Whenever I come across anything interesting during the development process I write about it in my [blog](https://laelapa.dev/blog).
 - https://laelapa.dev/blog/001-the-three-value-problem--a-journey-from-json-to-go-pointers-to-postgres-native-types : Here you can read about how I tried to overcome some patterns that emerged in my code when I tried to add partial updates via PATCH. 
 
----
-
-### Table of Contents
-
-- [Features](#features)
-- [Technical Highlights](#technical-highlights)
-- [Project Structure](#project-structure)
-- [API Overview](#api-overview)
-- [Getting Started](#getting-started)
-- [Security Considerations](#security-considerations)
-- [Development Notes](#development-notes)
-
-
 ## Features
 
 - **API**
