@@ -9,6 +9,10 @@
     {
       "url": "https://plateops.fly.dev",
       "description": "Server under iterative development"
+    },
+    {
+      "url": "http://localhost:8081",
+      "description": "Test environment server"
     }
   ],
   "components": {
