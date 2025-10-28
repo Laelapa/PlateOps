@@ -2,7 +2,18 @@
 
 <img align="right" width="320" src="PlateOpsMascot.png">
 
-PlateOps is a comprehensive food management platform that provides a searchable registry of foods and recipes, inventory tracking, nutrition monitoring, and user authentication. Built as a robust backend API, PlateOps empowers developers to create food-focused applications while, in its final version, it will enable users to manage their pantry, track their nutritional intake, and receive recipe suggestions. The platform recommends recipes based on food stocks, the users' macronutrient goals for the day, and ingredient expiration dates minimizing food spoilage and waste.
+PlateOps is a comprehensive diet management platform. Currently it provides: 
+- a registry of foods with fuzzy search capability,
+- RESTful API endpoints,
+- a self-rolled authentication system that supports hashed passwords, stateless and short-lived JWTs, database-backed & fingerprinted refresh tokens with logout/revocation support,
+- structured logging, 
+- event publishing capability to Kafka topics, 
+- type-safe database queries through sqlc instead of an ORM,
+- validation of all user input. 
+
+Built as an API service, PlateOps empowers developers to create food-focused applications on top of it.
+
+In its final version it will enable users to manage their pantry/inventory, track their nutritional intake, and receive recipe suggestions. It will recommend recipes based on the users' food stocks, their macronutrient goals for the day, and ingredient expiration dates & open packaging, minimizing food spoilage and waste.
 
 ---
 
@@ -17,25 +28,43 @@ PlateOps is a comprehensive food management platform that provides a searchable 
 - [Development Notes](#development-notes)
 - [License](#license)
 
----
 
 ## Features
 
 ### User Features
 
-- **User Registration & Authentication**
+- **API**
+  - OpenAPI JSON and Swagger UI for API exploration.
+  - Rigorous input validation on all endpoints guarding against injections and malformed data.
+
+- **Self-Rolled User Registration & Authentication**
   - Secure signup and login endpoints with password hashing (bcrypt).
   - JWT-based stateless authentication for accessing protected endpoints.
   - Refresh token mechanism for secure session renewal.
   - Logout and token revocation support.
  
-- **OpenAPI Documentation**
-  - Self-hosted OpenAPI JSON and Swagger UI for API exploration.
-
 - **Food Registry**
   - Create, update, and search food entries.
   - Retrieve food by ID or GTIN (barcode).
-  - Fuzzy search for foods by name with tolerance for typos.
+  - Fuzzy search for foods by name.
+
+- **Database**
+  - All database access code hand-typed SQL wrapped in type-safe Go functions using [sqlc](https://sqlc.dev/) affording us the following benefits:
+    - compile-time verification & type safety,
+    - LSP support,
+    - no runtime overhead,
+    - total transparency on what query is being executed (because they are all hand-typed & then wrapped)
+  - Migration-based Schema managed with [goose](https://github.com/pressly/goose).
+  - Uses pgxpool connection pooling.
+
+- **Observability**
+  - Structured Logging of requests, errors, and application state with [uber/zap](https://github.com/uber-go/zap).
+
+
+- **Structure & Extensibility**
+  - Composable Middleware: Security, logging, and cache headers are applied via middleware.
+  - Kafka Integration: Events like food updates and user signups can be published to Kafka for downstream consumers.
+  - Modular Design: Clean package boundaries for authentication, database, middleware, and routing.
 
 - **Inventory Management \***
   - Track owned food items, quantities, and expiration dates.
@@ -47,59 +76,26 @@ PlateOps is a comprehensive food management platform that provides a searchable 
 
 - **Role Management \***
   - Basic role support (`user`, `admin`, `limited`) for future access control expansions.
+  
 
 \* *Migrations and queries implemented, endpoints and business logic are in the oven*
 
-
----
-
-## Technical Highlights
-
-### Security
-
-- **JWT Authentication**: Stateless, signed tokens with configurable expiry.
-- **Refresh Token Rotation**: Long-lived, database-backed tokens with fingerprinting (user agent & IP).
-- **Rate Limiting (Planned)**: Middleware-ready structure for future rate limiting.
-- **Role-based Access (Planned)**: Role model implemented for future granular permissions.
-
-### Data Integrity & Validation
-
-- **Centralized Validation**: All user input is validated.
-- **SQLC Typed Queries**: All database access is generated and type-checked using [sqlc](https://sqlc.dev/), reducing runtime query errors.
-- **Migration-based Schema**: Database schema is managed via [goose](https://github.com/pressly/goose) migrations.
-
-### Observability
-
-- **Structured Logging**: All requests and errors are logged with [zap](https://github.com/uber-go/zap).
-- **Composable Middleware**: Security, logging, and cache headers are applied via middleware.
-
-### Extensibility
-
-- **Kafka Integration**: Events like food updates and user signups can be published to Kafka for downstream consumers.
-- **Modular Design**: Clean package boundaries for authentication, database, middleware, routing, and business logic.
-
-### Performance
-
-- **Connection Pooling**: Uses pgxpool for efficient PostgreSQL access.
-- **Optimized Queries**: Generated type-safe compile-ready Go code instead of ORM.
-
----
-
 ## Project Structure
 
-```
-cmd/api/                 # Main entrypoint (API server)
-internal/app/            # Core application bootstrapping
-internal/repository/     # SQLC-generated DB access (queries, models)
-internal/migrations/     # Database migration files
-internal/routes/         # HTTP routing and handlers
-internal/services/       # Business logic modules (auth, etc)
-internal/middleware/     # HTTP middleware (security, logging)
-internal/env/            # Environment/config parsing
-util/                    # Supporting utilities (validation, net, parsing, etc)
-auth/tokenauthority/     # JWT and refresh token issuing & validation service
-docs/                    # OpenAPI schema & documentation
-```
+| Directory | Description |
+| ---- | ---- |
+|[cmd/api/](cmd/api/) | API server, main entrypoint |
+|[internal/app/](internal/app/) | Core application bootstrapping |
+|[internal/queries/](internal/queries/) | Hand-typed SQL |
+|[internal/repository/](internal/repository/) | sqlc-generated DB access layer |
+|[internal/migrations/](internal/migrations/) | Database migration files |
+|[internal/routes/](internal/routes/) | HTTP routing and handlers |
+|[internal/services/](internal/services/) | Business logic modules (auth etc) |
+|[internal/middleware/](internal/middleware/) | HTTP middleware (security, logging) |
+|[internal/env/](internal/env/) | Environment & config parsing |
+|[util/](util/) | misc utilites (data parsing & validation, net, type converters, etc) |
+|[auth/tokenauthority/](auth/tokenauthority/) | JWT and refresh token issuing & validation service |
+|[docs/](docs/) | OpenAPI schema & documentation | 
 
 ---
 
@@ -133,11 +129,11 @@ See the [OpenAPI spec](docs/openapi.json) for request and response details.
 - [sqlc](https://sqlc.dev/) (optional, if extending/modifying/regenerating queries is needed)
 - PostgreSQL
 - Kafka/Redpanda (optional, for event streaming)
-- Docker (optional, for containerization/deployment)
+- Docker (optional, for containerized deployment)
 
 ### Environment Variables
 
-See the `dotenv.example` file for required configuration (documentation in the github wiki pages planned).
+See the `dotenv.example` file for required configuration (documentation in the github wiki pages is a work-in-progress).
 Key variables include:
 
 - `ENVIRONMENT` — Sets logging and other functionalities to developer friendly or production configuration
@@ -184,17 +180,16 @@ or you can use the provided `Dockerfile` to build an alpine-based docker image r
 - Database schema uses foreign keys and check constraints for referential integrity.
 
 >[!IMPORTANT]
->**Fly.io**: The project is currently configured for deployment on [fly.io](https://fly.io) and utilizes platform-specific headers like [`Fly-Client-IP`](https://fly.io/docs/networking/request-headers/#fly-client-ip). For deployments elsewhere this needs to be taken into consideration, as at best they won't be set and at worst they could be spoofed by users.
+>The project is currently configured for deployment on [fly.io](https://fly.io) and utilizes platform-specific headers like [`Fly-Client-IP`](https://fly.io/docs/networking/request-headers/#fly-client-ip). For deployments elsewhere this needs to be taken into consideration, as at best they won't be set and at worst they could be spoofed by users.
 
 ---
 
 ## Development Notes
 
-- **Tests**: (To be expanded) Unit and integration tests are planned for all major components.
 - **Error Handling**: All errors are logged; user-facing errors don't broadcast sensitive details.
-- **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints in the code, synergistic microservices via pub/sub and API, or attaching external integrations such as front-ends to the API.
+- **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints, synergistic microservices via pub/sub and API, or attaching external integrations such as front-ends to the API.
 - **Contributions**: Please open issues, discussions, or PRs to discuss features, bugs, or improvements.
 
 ---
 
-*The gopher mascot is a derivative work based on the Go gopher by Renee French (https://reneefrench.blogspot.com/) which carries the Creative Commons 4.0 Attributions license*
+*The gopher mascot is a derivative work based on the Go gopher by Renee French (https://reneefrench.blogspot.com/) which carries the Creative Commons 4.0 Attributions license.*
