@@ -16,6 +16,10 @@ Built as an API service, PlateOps empowers developers to create food-focused app
 In its final version it will enable users to manage their pantry/inventory, track their nutritional intake, and receive recipe suggestions. It will recommend recipes based on the users' food stocks, their macronutrient goals for the day, and ingredient expiration dates & open packaging, minimizing food spoilage and waste.
 
 ---
+Whenever I come across anything interesting during the development process I write about it in my [blog](https://laelapa.dev/blog).
+- https://laelapa.dev/blog/001-the-three-value-problem--a-journey-from-json-to-go-pointers-to-postgres-native-types : Here you can read about how I tried to overcome some patterns that emerged in my code when I tried to add partial updates via PATCH. 
+
+---
 
 ### Table of Contents
 
@@ -26,12 +30,9 @@ In its final version it will enable users to manage their pantry/inventory, trac
 - [Getting Started](#getting-started)
 - [Security Considerations](#security-considerations)
 - [Development Notes](#development-notes)
-- [License](#license)
 
 
 ## Features
-
-### User Features
 
 - **API**
   - OpenAPI JSON and Swagger UI for API exploration.
@@ -176,15 +177,15 @@ or you can use the provided `Dockerfile` to build an alpine-based docker image r
 - Refresh tokens are invalidated upon logout, expiration, or server-side revocation.
 - Refresh tokens are bound to user agent and IP.
 - JWT lifetime should be set to something short (i.e. 3 minutes) for production environments. Control of JWT lifetime via environment variable coming soon.
-- All endpoints validate input rigorously to prevent injection and malformed data.
+- All endpoints validate user input.
 - Database schema uses foreign keys and check constraints for referential integrity.
 
 >[!IMPORTANT]
->The project is currently configured for deployment on [fly.io](https://fly.io) and utilizes platform-specific headers like [`Fly-Client-IP`](https://fly.io/docs/networking/request-headers/#fly-client-ip). For deployments elsewhere this needs to be taken into consideration, as at best they won't be set and at worst they could be spoofed by users.
+>The project is currently configured for deployment on [fly.io](https://fly.io) and utilizes platform-specific headers like [`Fly-Client-IP`](https://fly.io/docs/networking/request-headers/#fly-client-ip). For deployments elsewhere this needs to be taken into consideration, as at best they won't be set or they could be spoofed by users when they aren't controlled by the fly environment.
 
 ---
 
-## Development Notes
+## Other Small Notes
 
 - **Error Handling**: All errors are logged; user-facing errors don't broadcast sensitive details.
 - **Extensibility**: The codebase is designed for adding new food/inventory/recipe endpoints, synergistic microservices via pub/sub and API, or attaching external integrations such as front-ends to the API.
