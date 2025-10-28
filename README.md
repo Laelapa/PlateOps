@@ -39,7 +39,7 @@ Whenever I come across anything interesting during the development process I wri
   - Fuzzy search for foods by name.
 
 - **Database**
-  - All database access code hand-typed SQL wrapped in type-safe Go functions using [sqlc](https://sqlc.dev/) affording us the following benefits:
+  - All database access code is hand-typed SQL wrapped in type-safe Go functions using [sqlc](https://sqlc.dev/) affording us the following benefits:
     - compile-time verification & type safety,
     - LSP support,
     - no runtime overhead,
